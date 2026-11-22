@@ -1,0 +1,341 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 0,
+ "allow_rename": 1,
+ "autoname": "format:AMEND-{performance_plan}-{amendment_number}",
+ "creation": "2026-09-08 13:55:00",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_overview",
+  "performance_plan",
+  "cycle",
+  "calendar_year",
+  "amendment_number",
+  "revision_date",
+  "col_overview_2",
+  "status",
+  "reason",
+  "sec_remarks",
+  "supervisor_remark",
+  "col_remarks_2",
+  "reviewer_remark",
+  "sec_targets",
+  "previous_targets_html",
+  "previous_targets",
+  "revised_targets",
+  "sec_weights",
+  "previous_total_weight",
+  "col_weights_2",
+  "revised_total_weight",
+  "sec_history",
+  "approval_history",
+  "sec_employee_details",
+  "employee",
+  "employee_name",
+  "grade_group",
+  "col_emp_2",
+  "supervisor_snapshot",
+  "reviewer_snapshot",
+  "supervisor_2_snapshot"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Amendment Details"
+  },
+  {
+   "fieldname": "performance_plan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Performance Plan",
+   "options": "PMS Appraisal",
+   "read_only": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fetch_from": "performance_plan.cycle",
+   "fieldname": "cycle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cycle",
+   "options": "PMS Appraisal Cycle",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "cycle.calendar_year",
+   "fieldname": "calendar_year",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Calendar Year",
+   "options": "\n2026\n2027\n2028\n2029\n2030\n2031\n2032\n2033\n2034\n2035",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amendment_number",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Amendment Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "revision_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Revision Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_overview_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nPending Supervisor Approval\nPending Reviewer Approval\nApproved\nReturned\nRejected",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reason for Amendment"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sec_remarks",
+   "fieldtype": "Section Break",
+   "label": "Review Remarks"
+  },
+  {
+   "fieldname": "supervisor_remark",
+   "fieldtype": "Small Text",
+   "label": "Supervisor Remark"
+  },
+  {
+   "fieldname": "col_remarks_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reviewer_remark",
+   "fieldtype": "Small Text",
+   "label": "Reviewer Remark"
+  },
+  {
+   "fieldname": "sec_targets",
+   "fieldtype": "Section Break",
+   "label": "Targets Revision & Comparison"
+  },
+  {
+   "fieldname": "previous_targets_html",
+   "fieldtype": "HTML",
+   "label": "Previous Targets Snapshot"
+  },
+  {
+   "fieldname": "previous_targets",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Previous Targets Snapshot (JSON)",
+   "options": "JSON",
+   "read_only": 1
+  },
+  {
+   "fieldname": "revised_targets",
+   "fieldtype": "Table",
+   "label": "Revised Targets",
+   "options": "PMS Target"
+  },
+  {
+   "fieldname": "sec_weights",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Total Weights Summary"
+  },
+  {
+   "fieldname": "previous_total_weight",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "in_list_view": 0,
+   "label": "Previous Total Weight (%)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_weights_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "revised_total_weight",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "in_list_view": 0,
+   "label": "Revised Total Weight (%)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sec_history",
+   "fieldtype": "Section Break",
+   "label": "Approval History & Audit Trail"
+  },
+  {
+   "fieldname": "approval_history",
+   "fieldtype": "Table",
+   "label": "Approval History Log",
+   "options": "PMS Amendment Log"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sec_employee_details",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Employee & Reporting Line Reference"
+  },
+  {
+   "fetch_from": "performance_plan.employee",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "performance_plan.grade_group",
+   "fieldname": "grade_group",
+   "fieldtype": "Data",
+   "label": "Grade Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_emp_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "performance_plan.supervisor_snapshot",
+   "fieldname": "supervisor_snapshot",
+   "fieldtype": "Data",
+   "label": "Supervisor",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "performance_plan.reviewer_snapshot",
+   "fieldname": "reviewer_snapshot",
+   "fieldtype": "Data",
+   "label": "Reviewer",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "performance_plan.supervisor_2_snapshot",
+   "fieldname": "supervisor_2_snapshot",
+   "fieldtype": "Data",
+   "ignore_user_permissions": 1,
+   "label": "Supervisor 2",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-29 01:26:00.000000",
+ "modified_by": "Administrator",
+ "module": "GDL PMS",
+ "name": "PMS Plan Amendment",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Supervisor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Reviewer",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Supervisor 2"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Admin",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "search_fields": "performance_plan,employee,employee_name",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_views": 1
+}

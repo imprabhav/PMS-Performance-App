@@ -1,0 +1,1706 @@
+/* ==========================================================================
+   GDL PMS - Modern Glassmorphism Login Page & Web Beautification
+   ========================================================================== */
+
+/* --- LOGIN PAGE CONTAINER BACKGROUND --- */
+body[data-route="login"],
+.page-card,
+body.frappe-card-page {
+    background-color: #04120c !important;
+}
+
+body[data-route="login"]::before,
+.for-login::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(21, 128, 61, 0.45) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(13, 148, 136, 0.4) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.2) 0%, transparent 60%),
+        linear-gradient(135deg, #04140d 0%, #0b291a 50%, #061e16 100%) !important;
+    background-size: 200% 200%;
+    animation: pulseGradient 12s ease infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes pulseGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* --- GLASSMORPHIC LOGIN CARD --- */
+.page-card {
+    position: relative !important;
+    z-index: 10 !important;
+    max-width: 440px !important;
+    margin: 40px auto !important;
+    padding: 36px 32px !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    border-radius: 20px !important;
+    box-shadow:
+        0 20px 40px -15px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(16, 185, 129, 0.25) !important;
+    animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- LOGO BEAUTIFICATION --- */
+.page-card-head .app-logo {
+    max-height: 110px !important;
+    max-width: 85% !important;
+    width: auto !important;
+    margin: 0 auto 20px auto !important;
+    display: block !important;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1)) !important;
+    transition: transform 0.3s ease !important;
+}
+
+.page-card-head .app-logo:hover {
+    transform: scale(1.03) !important;
+}
+
+/* --- LOGIN FORM LABELS & HEADINGS --- */
+.page-card-head {
+    text-align: center !important;
+    margin-bottom: 24px !important;
+}
+
+.page-card .page-card-head h4,
+.page-card .page-card-head .title {
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    font-size: 22px !important;
+    letter-spacing: -0.5px !important;
+}
+
+.page-card label {
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    color: #334155 !important;
+    margin-bottom: 6px !important;
+}
+
+/* --- LOGIN INPUT FIELDS & ICONS FIX --- */
+.email-field,
+.password-field {
+    position: relative !important;
+}
+
+.page-card .form-control {
+    background-color: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    padding: 12px 16px 12px 42px !important;
+    height: 46px !important;
+    font-size: 14px !important;
+    color: #0f172a !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.password-field .form-control {
+    padding-right: 42px !important;
+}
+
+.email-field .field-icon,
+.password-field .field-icon {
+    position: absolute !important;
+    left: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 5 !important;
+    pointer-events: none !important;
+    color: #64748b !important;
+    stroke: #64748b !important;
+}
+
+.password-field .toggle-password {
+    position: absolute !important;
+    right: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 5 !important;
+    cursor: pointer !important;
+    color: #64748b !important;
+    stroke: #64748b !important;
+    transition: color 0.2s ease !important;
+}
+
+.password-field .toggle-password:hover {
+    color: #15803d !important;
+    stroke: #15803d !important;
+}
+
+.page-card .form-control:focus {
+    background-color: #ffffff !important;
+    border-color: #15803d !important;
+    box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.18) !important;
+    outline: none !important;
+}
+
+/* --- LOGIN BUTTON --- */
+.page-card .btn-login,
+.page-card .btn-primary {
+    background: linear-gradient(135deg, #15803d 0%, #0d9488 100%) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    height: 48px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(21, 128, 61, 0.35) !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    margin-top: 10px !important;
+}
+
+.page-card .btn-login:hover,
+.page-card .btn-primary:hover {
+    background: linear-gradient(135deg, #166534 0%, #0f766e 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(21, 128, 61, 0.45) !important;
+}
+
+.page-card .btn-login:active,
+.page-card .btn-primary:active {
+    transform: translateY(0) scale(0.99) !important;
+}
+
+/* Navbar logo override */
+.navbar-brand img.app-logo {
+    max-height: 32px !important;
+}
+
+/* ==========================================================================
+   PMS Employee Modern Dashboard Upgrade & Full Width Stretch
+   ========================================================================== */
+
+/* Overrides to stretch Frappe Desk container full width */
+body:has(.gdl-pms-dashboard-wrapper) .page-body,
+body:has(.gdl-pms-dashboard-wrapper) .page-content,
+body:has(.gdl-pms-dashboard-wrapper) .layout-main-section,
+body:has(.gdl-pms-dashboard-wrapper) .layout-main-section-wrapper,
+body:has(.gdl-pms-dashboard-wrapper) .container,
+[data-page-route*="pms"] .page-body,
+[data-page-route*="pms"] .page-content,
+[data-page-route*="pms"] .layout-main-section,
+[data-page-route*="pms"] .container,
+.gdl-pms-custom-dashboard-active,
+.gdl-pms-custom-dashboard-active .container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.gdl-pms-dashboard-wrapper {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 28px 40px;
+    background-color: #f8fafc;
+    min-height: calc(100vh - 60px);
+    width: 100% !important;
+    box-sizing: border-box !important;
+    color: #1e293b;
+}
+
+/* --- HEADER SECTION --- */
+.pms-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+}
+
+.pms-greeting-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+    letter-spacing: -0.5px;
+}
+
+.pms-greeting-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+.pms-quote-col {
+    text-align: right;
+    max-width: 280px;
+}
+
+.pms-quote-text {
+    font-style: italic;
+    font-size: 13px;
+    color: #475569;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.pms-quote-line {
+    width: 32px;
+    height: 2px;
+    background-color: #2563eb;
+    margin-left: auto;
+    margin-top: 6px;
+    border-radius: 2px;
+}
+
+/* --- STAT CARDS GRID --- */
+.pms-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.pms-stat-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px 24px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+}
+
+.pms-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.07);
+}
+
+.pms-stat-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.pms-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.box-blue {
+    background-color: #eff6ff;
+}
+
+.box-green {
+    background-color: #f0fdf4;
+}
+
+.box-purple {
+    background-color: #faf5ff;
+}
+
+.pms-stat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pms-stat-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.pms-stat-arrow-top {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.pms-stat-number-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.pms-stat-number {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+}
+
+.pms-circle-arrow-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pms-stat-card:hover .pms-circle-arrow-btn {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+.pms-stat-subtext {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* --- MIDDLE GRID --- */
+.pms-mid-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.pms-section-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.pms-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.pms-section-icon {
+    font-size: 16px;
+}
+
+.pms-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.pms-quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+}
+
+.pms-action-tile {
+    border-radius: 14px;
+    padding: 16px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tile-blue {
+    background-color: #eff6ff;
+}
+
+.tile-green {
+    background-color: #f0fdf4;
+}
+
+.tile-teal {
+    background-color: #f0fdfa;
+}
+
+.tile-purple {
+    background-color: #faf5ff;
+}
+
+.tile-orange {
+    background-color: #fff7ed;
+}
+
+.pms-action-tile:hover {
+    transform: translateY(-2px);
+    filter: brightness(0.97);
+}
+
+.pms-action-icon-box {
+    margin-bottom: 10px;
+}
+
+.pms-action-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #334155;
+    line-height: 1.3;
+}
+
+/* --- BANNER CARD --- */
+.pms-banner-card {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border: 1px solid #bfdbfe;
+}
+
+.pms-banner-illustration {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    width: 60%;
+    pointer-events: none;
+}
+
+.pms-banner-content {
+    position: relative;
+    z-index: 2;
+    max-width: 65%;
+}
+
+.pms-banner-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #2563eb;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+}
+
+.pms-banner-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1e3a8a;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.3px;
+}
+
+.pms-banner-desc {
+    font-size: 12px;
+    color: #3b82f6;
+    margin: 0 0 16px 0;
+    line-height: 1.4;
+}
+
+.pms-btn-primary {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    border-radius: 10px !important;
+    padding: 8px 18px !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+    transition: all 0.2s ease !important;
+}
+
+.pms-btn-primary:hover {
+    background-color: #1d4ed8 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* --- BOTTOM GRID --- */
+.pms-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.pms-card-header-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.pms-btn-view-all {
+    background-color: #f1f5f9 !important;
+    border-radius: 8px !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    padding: 4px 12px !important;
+}
+
+.pms-activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pms-activity-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.pms-activity-row:hover {
+    background-color: #f8fafc;
+}
+
+.pms-activity-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pms-activity-details {
+    flex-grow: 1;
+}
+
+.pms-activity-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.pms-activity-subtitle {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.pms-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+.badge-approved {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.badge-pending {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+.badge-inprogress {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.badge-draft {
+    background-color: #f1f5f9;
+    color: #64748b;
+}
+
+.badge-rejected,
+.badge-returned {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+/* --- PERFORMANCE JOURNEY CARD --- */
+.pms-cycle-select {
+    width: 140px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 12px;
+}
+
+.pms-journey-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.pms-journey-icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.pms-journey-empty-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px 0;
+}
+
+.pms-journey-empty-desc {
+    font-size: 12px;
+    color: #64748b;
+    max-width: 260px;
+    margin: 0 0 16px 0;
+    line-height: 1.4;
+}
+
+.pms-btn-outline {
+    border: 1px solid #2563eb !important;
+    color: #2563eb !important;
+    background: transparent !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 6px 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+.pms-btn-outline:hover {
+    background-color: #eff6ff !important;
+}
+
+/* Supervisor & Reviewer Custom Theme Accents */
+.box-orange {
+    background-color: #fff7ed;
+}
+
+.badge-purple {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+}
+
+.pms-banner-supervisor {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%) !important;
+    border-color: #fde68a !important;
+}
+
+.badge-supervisor-tag {
+    color: #d97706 !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+.pms-banner-supervisor .pms-banner-title {
+    color: #92400e !important;
+}
+
+.pms-banner-supervisor .pms-banner-desc {
+    color: #b45309 !important;
+}
+
+.pms-banner-supervisor .pms-btn-primary {
+    background-color: #d97706 !important;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3) !important;
+}
+
+.pms-banner-supervisor .pms-btn-primary:hover {
+    background-color: #b45309 !important;
+}
+
+.pms-banner-reviewer {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #e9d5ff 100%) !important;
+    border-color: #d8b4fe !important;
+}
+
+.badge-reviewer-tag {
+    color: #7e22ce !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+.pms-banner-reviewer .pms-banner-title {
+    color: #581c87 !important;
+}
+
+.pms-banner-reviewer .pms-banner-desc {
+    color: #7e22ce !important;
+}
+
+.btn-purple-banner {
+    background-color: #9333ea !important;
+    box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3) !important;
+}
+
+.btn-purple-banner:hover {
+    background-color: #7e22ce !important;
+}
+
+.btn-outline-purple {
+    border-color: #9333ea !important;
+    color: #9333ea !important;
+}
+
+.btn-outline-purple:hover {
+    background-color: #faf5ff !important;
+}
+
+/* HR Admin Dashboard Styles */
+.pms-stats-4col {
+    grid-template-columns: repeat(4, 1fr) !important;
+}
+
+.pms-banner-hr {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%) !important;
+    border-color: #6ee7b7 !important;
+}
+
+.badge-hr-tag {
+    color: #047857 !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+.pms-banner-hr .pms-banner-title {
+    color: #065f46 !important;
+}
+
+.pms-banner-hr .pms-banner-desc {
+    color: #047857 !important;
+}
+
+.btn-hr-banner {
+    background-color: #059669 !important;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3) !important;
+}
+
+.btn-hr-banner:hover {
+    background-color: #047857 !important;
+}
+
+/* Top Left App Logo Enhancements */
+.app-switcher .avatar,
+.sidebar-header .avatar,
+.sidebar-header .sidebar-item-icon,
+.sidebar-header .header-logo,
+.workspace-sidebar-header .avatar,
+.app-switcher-icon,
+.app-sidebar-header .avatar {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.pms-top-logo {
+    max-height: 38px !important;
+    height: 32px !important;
+    width: auto !important;
+    object-fit: contain !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08)) !important;
+}
+
+/* ==========================================================================
+   PMS PERFORMANCE PLAN vs APPRAISAL FIELD VISIBILITY
+   ========================================================================== */
+
+/* 1. In Performance Plan Mode: Strictly Hide All Scoring & Appraisal Columns / Fields on PMS Appraisal */
+.gdl-pms-plan-mode [data-fieldname="self_score"],
+.gdl-pms-plan-mode [data-fieldname="self_remark"],
+.gdl-pms-plan-mode [data-fieldname="evidence"],
+.gdl-pms-plan-mode [data-fieldname="supervisor_score"],
+.gdl-pms-plan-mode [data-fieldname="supervisor_remark"],
+.gdl-pms-plan-mode [data-fieldname="reviewer_score"],
+.gdl-pms-plan-mode [data-fieldname="reviewer_remark"],
+.gdl-pms-plan-mode [data-fieldname="self_rating"],
+.gdl-pms-plan-mode [data-fieldname="supervisor_rating"],
+.gdl-pms-plan-mode [data-fieldname="reviewer_rating"],
+.gdl-pms-plan-mode [data-fieldname="employee_overall_remarks"],
+.gdl-pms-plan-mode [data-fieldname="supervisor_overall_remarks"],
+.gdl-pms-plan-mode [data-fieldname="reviewer_overall_remarks"],
+.gdl-pms-plan-mode [data-fieldname="total_score"],
+.gdl-pms-plan-mode [data-fieldname="rating_band"],
+.gdl-pms-plan-mode:not(.pms-appraisal-list-view) [data-fieldname="appraisal_status"],
+.gdl-pms-plan-mode [data-fieldname="dispute_flag"],
+.gdl-pms-plan-mode [data-fieldname="dispute_reason"],
+.gdl-pms-plan-mode [data-fieldname="locked"],
+.gdl-pms-plan-mode [data-fieldname="perc_case"],
+.gdl-pms-plan-mode [data-fieldname="amendment_window_open"],
+
+/* Also hide grid column headers AND row cells in tables */
+.gdl-pms-plan-mode .grid-heading-row [data-fieldname="self_score"],
+.gdl-pms-plan-mode .grid-heading-row [data-fieldname="self_remark"],
+.gdl-pms-plan-mode .grid-heading-row [data-fieldname="evidence"],
+.gdl-pms-plan-mode .grid-heading-row [data-fieldname="supervisor_score"],
+.gdl-pms-plan-mode .grid-heading-row [data-fieldname="supervisor_remark"],
+.gdl-pms-plan-mode .grid-heading-row [data-fieldname="reviewer_score"],
+.gdl-pms-plan-mode .grid-heading-row [data-fieldname="reviewer_remark"],
+.gdl-pms-plan-mode .grid-heading-row [data-fieldname="self_rating"],
+.gdl-pms-plan-mode .grid-heading-row [data-fieldname="supervisor_rating"],
+.gdl-pms-plan-mode .grid-heading-row [data-fieldname="reviewer_rating"],
+.gdl-pms-plan-mode .grid-row [data-fieldname="self_score"],
+.gdl-pms-plan-mode .grid-row [data-fieldname="self_remark"],
+.gdl-pms-plan-mode .grid-row [data-fieldname="evidence"],
+.gdl-pms-plan-mode .grid-row [data-fieldname="supervisor_score"],
+.gdl-pms-plan-mode .grid-row [data-fieldname="supervisor_remark"],
+.gdl-pms-plan-mode .grid-row [data-fieldname="reviewer_score"],
+.gdl-pms-plan-mode .grid-row [data-fieldname="reviewer_remark"],
+.gdl-pms-plan-mode .grid-row [data-fieldname="self_rating"],
+.gdl-pms-plan-mode .grid-row [data-fieldname="supervisor_rating"],
+.gdl-pms-plan-mode .grid-row [data-fieldname="reviewer_rating"] {
+    display: none !important;
+}
+
+/* Hide Performance Plan and Status columns in Draft / New PMS Appraisal Cycle */
+.gdl-pms-draft-cycle [data-fieldname="performance_plan"],
+.gdl-pms-draft-cycle [data-fieldname="appraisal_status"],
+.gdl-pms-draft-cycle .grid-heading-row [data-fieldname="performance_plan"],
+.gdl-pms-draft-cycle .grid-heading-row [data-fieldname="appraisal_status"],
+.gdl-pms-draft-cycle .grid-row [data-fieldname="performance_plan"],
+.gdl-pms-draft-cycle .grid-row [data-fieldname="appraisal_status"] {
+    display: none !important;
+}
+
+/* 2. In Self-Assessment Stage of Appraisal Mode: Hide Supervisor and Reviewer scoring columns until submitted */
+.gdl-pms-self-assessment-stage .grid-heading-row [data-fieldname="supervisor_score"],
+.gdl-pms-self-assessment-stage .grid-heading-row [data-fieldname="supervisor_remark"],
+.gdl-pms-self-assessment-stage .grid-heading-row [data-fieldname="reviewer_score"],
+.gdl-pms-self-assessment-stage .grid-heading-row [data-fieldname="reviewer_remark"],
+.gdl-pms-self-assessment-stage .grid-heading-row [data-fieldname="supervisor_rating"],
+.gdl-pms-self-assessment-stage .grid-heading-row [data-fieldname="reviewer_rating"],
+.gdl-pms-self-assessment-stage .grid-row [data-fieldname="supervisor_score"],
+.gdl-pms-self-assessment-stage .grid-row [data-fieldname="supervisor_remark"],
+.gdl-pms-self-assessment-stage .grid-row [data-fieldname="reviewer_score"],
+.gdl-pms-self-assessment-stage .grid-row [data-fieldname="reviewer_remark"],
+.gdl-pms-self-assessment-stage .grid-row [data-fieldname="supervisor_rating"],
+.gdl-pms-self-assessment-stage .grid-row [data-fieldname="reviewer_rating"],
+.gdl-pms-self-assessment-stage [data-fieldname="supervisor_overall_remarks"],
+.gdl-pms-self-assessment-stage [data-fieldname="reviewer_overall_remarks"] {
+    display: none !important;
+}
+
+/* 3. Completely hide Planning Remark across Plan and Appraisal, and hide Overall Remarks */
+[data-fieldname="targets"] [data-fieldname="remark"],
+.grid-heading-row [data-fieldname="remark"],
+.grid-row [data-fieldname="remark"],
+[data-fieldname="employee_overall_remarks"],
+[data-fieldname="supervisor_overall_remarks"],
+[data-fieldname="reviewer_overall_remarks"] {
+    display: none !important;
+}
+
+/* 4. Appraisal Mode: Explicitly display Self Score Remarks and Supporting Docs, and hide Plan Target Reviews */
+.gdl-pms-appraisal-mode [data-fieldname="self_remark"],
+.gdl-pms-appraisal-mode .grid-heading-row [data-fieldname="self_remark"],
+.gdl-pms-appraisal-mode .grid-row [data-fieldname="self_remark"],
+.gdl-pms-appraisal-mode [data-fieldname="evidence"],
+.gdl-pms-appraisal-mode .grid-heading-row [data-fieldname="evidence"],
+.gdl-pms-appraisal-mode .grid-row [data-fieldname="evidence"] {
+    display: block !important;
+}
+
+.gdl-pms-appraisal-mode .grid-heading-row [data-fieldname="target_reviews"],
+.gdl-pms-appraisal-mode .grid-row [data-fieldname="target_reviews"],
+.gdl-pms-appraisal-mode .grid-heading-row [data-fieldname="reviewer_comments"],
+.gdl-pms-appraisal-mode .grid-row [data-fieldname="reviewer_comments"] {
+    display: none !important;
+}
+
+[data-fieldname="targets"] .grid-row [data-fieldname="self_remark"] .static-area,
+[data-fieldname="competencies"] .grid-row [data-fieldname="self_remark"] .static-area {
+    min-height: 28px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Format competency and multiline definition in Competencies child table */
+[data-fieldname="competencies"] .grid-row [data-fieldname="definition"],
+[data-fieldname="competencies"] [data-fieldname="definition"] {
+    white-space: pre-wrap !important;
+    line-height: 1.5 !important;
+    font-size: 12px !important;
+    color: #475569 !important;
+    word-break: break-word !important;
+}
+
+[data-fieldname="competencies"] .grid-row [data-fieldname="competency"],
+[data-fieldname="competencies"] [data-fieldname="competency"] {
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    line-height: 1.4 !important;
+}
+
+/* 4. Hide PMS Employee in sidebar for HR Admin */
+.gdl-pms-hr-dashboard-active .sidebar-item-container[data-public-name="PMS Employee"],
+.gdl-pms-hr-dashboard-active .sidebar-item-container[data-link-to="PMS Employee"],
+.gdl-pms-hr-dashboard-active .sidebar-item-container[item-name="PMS Employee"],
+.gdl-pms-hr-dashboard-active .sidebar-item-container[title="PMS Employee"] {
+    display: none !important;
+}
+
+/* ==========================================================================
+   5. MODERN HERO HEADER CARD (APPROACH A - NO AVATARS)
+   ========================================================================== */
+
+.form-message:has(.pms-hero-card-container),
+.form-message.pms-hero-msg-wrapper {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 0 14px 0 !important;
+    box-shadow: none !important;
+}
+
+.form-message:has(.pms-hero-card-container) .close-message,
+.form-message.pms-hero-msg-wrapper .close-message {
+    display: none !important;
+}
+
+.pms-hero-card-container {
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+.pms-hero-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 20px;
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+    display: grid;
+    grid-template-columns: minmax(230px, 1.15fr) minmax(260px, 1.25fr) minmax(290px, 1.4fr);
+    gap: 20px;
+    align-items: center;
+    position: relative;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.pms-hero-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+/* --- Left Section: Employee Information --- */
+.pms-hero-col-left {
+    gap: 6px;
+}
+
+.pms-hero-emp-name {
+    font-size: 16.5px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pms-hero-emp-sub {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.pms-hero-id-pill {
+    background: #f1f5f9;
+    color: #475569;
+    font-weight: 600;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    letter-spacing: 0.02em;
+}
+
+.pms-hero-sep {
+    color: #cbd5e1;
+    font-weight: 700;
+    font-size: 10px;
+}
+
+.pms-hero-desig {
+    color: #475569;
+    font-weight: 500;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pms-hero-badge-wrap {
+    margin-top: 2px;
+}
+
+.pms-hero-grade-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    width: fit-content;
+}
+
+.pms-hero-grade-badge.grade-os {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.pms-hero-grade-badge.grade-ps {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.pms-hero-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.grade-os .pms-hero-badge-dot {
+    background: #d97706;
+}
+
+.grade-ps .pms-hero-badge-dot {
+    background: #2563eb;
+}
+
+/* --- Middle Section: Reporting Line --- */
+.pms-hero-col-mid {
+    border-left: 1px solid #f1f5f9;
+    padding-left: 20px;
+    gap: 5px;
+}
+
+.pms-hero-col-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+    margin-bottom: 2px;
+}
+
+.pms-hero-rep-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 12px;
+}
+
+.pms-hero-rep-tag {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.pms-hero-rep-content {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pms-hero-rep-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 12px;
+}
+
+.pms-hero-rep-code {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* --- Right Section: Cycle, Status & Weight Distribution --- */
+.pms-hero-col-right {
+    border-left: 1px solid #f1f5f9;
+    padding-left: 20px;
+    gap: 8px;
+}
+
+.pms-hero-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pms-hero-cycle-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #334155;
+    max-width: 240px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pms-hero-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+.status-approved {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.status-locked {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+.status-appraisal-open {
+    background: #fefce8;
+    color: #a16207;
+    border: 1px solid #fef08a;
+}
+
+.status-amendment {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.status-pending-sup {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.status-returned-sup {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+}
+
+.status-pending-rev {
+    background: #fdf4ff;
+    color: #9333ea;
+    border: 1px solid #f0abfc;
+}
+
+.status-returned-rev {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.status-draft {
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.status-returned {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+}
+
+.status-rejected {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.pms-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-approved .pms-status-dot,
+.status-locked .pms-status-dot {
+    background: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.status-appraisal-open .pms-status-dot,
+.status-pending-sup .pms-status-dot,
+.status-returned-sup .pms-status-dot {
+    background: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.status-pending-rev .pms-status-dot {
+    background: #9333ea;
+    box-shadow: 0 0 0 2px rgba(147, 51, 234, 0.2);
+}
+
+.status-returned-rev .pms-status-dot,
+.status-rejected .pms-status-dot {
+    background: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.status-amendment .pms-status-dot {
+    background: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.status-draft .pms-status-dot {
+    background: #64748b;
+}
+
+.status-returned .pms-status-dot {
+    background: #ea580c;
+}
+
+.status-rejected .pms-status-dot {
+    background: #dc2626;
+}
+
+/* Weight Progress Bar */
+.pms-hero-weight-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pms-hero-weight-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: #475569;
+}
+
+.pms-weight-color-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 3px;
+}
+
+.dot-blue {
+    background: #0284c7;
+}
+
+.dot-purple {
+    background: #8b5cf6;
+}
+
+.pms-hero-weight-bar {
+    height: 8px;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    background: #e2e8f0;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.pms-weight-segment {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.seg-target {
+    background: linear-gradient(90deg, #0284c7, #38bdf8);
+}
+
+.seg-comp {
+    background: linear-gradient(90deg, #8b5cf6, #c084fc);
+}
+
+/* Alert inside Container */
+.pms-hero-alert {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+.pms-alert-warning {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+}
+
+.pms-alert-danger {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .pms-hero-card {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 14px;
+    }
+    .pms-hero-col-mid,
+    .pms-hero-col-right {
+        border-left: none;
+        border-top: 1px solid #f1f5f9;
+        padding-left: 0;
+        padding-top: 12px;
+    }
+}
+
+/* Dark mode support */
+[data-theme="dark"] .pms-hero-card {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4);
+}
+[data-theme="dark"] .pms-hero-emp-name {
+    color: #f8fafc;
+}
+[data-theme="dark"] .pms-hero-id-pill {
+    background: #0f172a;
+    border-color: #334155;
+    color: #94a3b8;
+}
+[data-theme="dark"] .pms-hero-col-mid,
+[data-theme="dark"] .pms-hero-col-right {
+    border-color: #334155;
+}
+[data-theme="dark"] .pms-hero-rep-item {
+    background: #0f172a;
+    border-color: #334155;
+}
+[data-theme="dark"] .pms-hero-rep-name {
+    color: #f1f5f9;
+}
+[data-theme="dark"] .pms-hero-cycle-badge {
+    background: #0f172a;
+    border-color: #334155;
+    color: #cbd5e1;
+}
+[data-theme="dark"] .pms-hero-weight-bar {
+    background: #334155;
+}
+
+/* Hiding vertical metadata fields in Plan mode ONLY on PMS Appraisal Form */
+.gdl-pms-plan-mode .form-layout [data-fieldname="employee_name"],
+.gdl-pms-plan-mode .form-layout [data-fieldname="grade_group"],
+.gdl-pms-plan-mode .form-layout [data-fieldname="supervisor_snapshot"],
+.gdl-pms-plan-mode .form-layout [data-fieldname="supervisor_name"],
+.gdl-pms-plan-mode .form-layout [data-fieldname="reviewer_snapshot"],
+.gdl-pms-plan-mode .form-layout [data-fieldname="reviewer_name"],
+.gdl-pms-plan-mode .form-layout [data-fieldname="supervisor_2_snapshot"],
+.gdl-pms-plan-mode .form-layout [data-fieldname="supervisor_2_name"],
+.gdl-pms-plan-mode .form-layout [data-fieldname="plan_status"],
+.gdl-pms-plan-mode .form-layout [data-fieldname="workflow_state"],
+.gdl-pms-plan-mode .form-layout [data-fieldname="amendment_window_open"] {
+    display: none !important;
+}
+
+/* Cycle & Employee setup bar styling when creating a new plan */
+.gdl-pms-is-new [data-fieldname="cycle"],
+.gdl-pms-is-new [data-fieldname="employee"] {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 14px;
+    margin-bottom: 12px;
+}
+
+.pms-hero-cycle-interactive {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-color: #93c5fd !important;
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+}
+
+.pms-hero-cycle-interactive:hover {
+    background: #dbeafe !important;
+    border-color: #3b82f6 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+}
+
+/* PMS Appraisal Table Score Footers */
+.pms-appraisal-score-line-container {
+    display: none !important;
+}
+
+.pms-table-score-footer {
+    margin-top: -1px;
+    margin-bottom: 16px;
+}
+
+.pms-footer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: #f8fafc;
+    border: 1px solid #d1d5db;
+    border-top: 2px solid #94a3b8;
+    border-radius: 0 0 8px 8px;
+    padding: 8px 14px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.pms-footer-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 13px;
+    color: #334155;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pms-footer-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pms-footer-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.pms-footer-chip .chip-label {
+    opacity: 0.9;
+    font-size: 11.5px;
+    font-weight: 500;
+}
+
+.pms-footer-chip .chip-val {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.pms-footer-chip .chip-max {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.pms-footer-chip.chip-weight {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+.pms-footer-chip.chip-self {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.pms-footer-chip.chip-supervisor {
+    background: #f5f3ff;
+    color: #6d28d9;
+    border: 1px solid #ddd6fe;
+}
+
+.pms-footer-chip.chip-reviewer {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+/* PMS Appraisal List View - Force Pixel Perfect Column Alignment */
+.pms-appraisal-list-view .list-row-col.list-subject,
+.pms-appraisal-list-view .list-row-col[data-fieldname="name"],
+[data-page-route*="PMS Appraisal"] .list-row-col.list-subject,
+[data-page-route*="PMS Appraisal"] .list-row-col[data-fieldname="name"] {
+    width: 160px !important;
+    min-width: 160px !important;
+    max-width: 160px !important;
+    flex: 0 0 160px !important;
+}
+
+.pms-appraisal-list-view .list-row-col[data-fieldname="employee"],
+[data-page-route*="PMS Appraisal"] .list-row-col[data-fieldname="employee"] {
+    width: 120px !important;
+    min-width: 120px !important;
+    max-width: 120px !important;
+    flex: 0 0 120px !important;
+}
+
+.pms-appraisal-list-view .list-row-col[data-fieldname="employee_name"],
+[data-page-route*="PMS Appraisal"] .list-row-col[data-fieldname="employee_name"] {
+    width: 135px !important;
+    min-width: 135px !important;
+    max-width: 135px !important;
+    flex: 0 0 135px !important;
+}
+
+.pms-appraisal-list-view .list-row-col[data-fieldname="cycle"],
+[data-page-route*="PMS Appraisal"] .list-row-col[data-fieldname="cycle"] {
+    width: 165px !important;
+    min-width: 165px !important;
+    max-width: 165px !important;
+    flex: 0 0 165px !important;
+}
+
+.pms-appraisal-list-view .list-row-col[data-fieldname="plan_status"],
+.pms-appraisal-list-view .list-row-col[data-fieldname="appraisal_status"],
+[data-page-route*="PMS Appraisal"] .list-row-col[data-fieldname="plan_status"],
+[data-page-route*="PMS Appraisal"] .list-row-col[data-fieldname="appraisal_status"] {
+    width: 210px !important;
+    min-width: 210px !important;
+    max-width: 210px !important;
+    flex: 0 0 210px !important;
+}
+
+.pms-appraisal-list-view .list-row-col[data-fieldname="supervisor_name"],
+[data-page-route*="PMS Appraisal"] .list-row-col[data-fieldname="supervisor_name"] {
+    width: 145px !important;
+    min-width: 145px !important;
+    max-width: 145px !important;
+    flex: 0 0 145px !important;
+}
+
+.pms-appraisal-list-view .list-row-col[data-fieldname="reviewer_name"],
+[data-page-route*="PMS Appraisal"] .list-row-col[data-fieldname="reviewer_name"] {
+    width: 145px !important;
+    min-width: 145px !important;
+    max-width: 145px !important;
+    flex: 0 0 145px !important;
+}
+
+.pms-appraisal-list-view .list-row-col[data-fieldname="total_score"],
+[data-page-route*="PMS Appraisal"] .list-row-col[data-fieldname="total_score"] {
+    width: 110px !important;
+    min-width: 110px !important;
+    max-width: 110px !important;
+    flex: 0 0 110px !important;
+}
+
+.pms-appraisal-list-view .list-row-col[data-fieldname="rating_band"],
+[data-page-route*="PMS Appraisal"] .list-row-col[data-fieldname="rating_band"] {
+    width: 170px !important;
+    min-width: 170px !important;
+    max-width: 170px !important;
+    flex: 0 0 170px !important;
+}
+
+
+
+
+
+
+
+/* Hide Performance Plan and Plan Status in Draft / New PMS Appraisal Cycle */
+.gdl-pms-draft-cycle [data-fieldname="performance_plan"],
+.gdl-pms-draft-cycle [data-fieldname="appraisal_status"],
+.gdl-pms-draft-cycle .grid-heading-row [data-fieldname="performance_plan"],
+.gdl-pms-draft-cycle .grid-heading-row [data-fieldname="appraisal_status"],
+.gdl-pms-draft-cycle .grid-row [data-fieldname="performance_plan"],
+.gdl-pms-draft-cycle .grid-row [data-fieldname="appraisal_status"],
+.gdl-pms-draft-cycle .grid-static-col[data-fieldname="performance_plan"],
+.gdl-pms-draft-cycle .grid-static-col[data-fieldname="appraisal_status"],
+.gdl-pms-draft-cycle .col[data-fieldname="performance_plan"],
+.gdl-pms-draft-cycle .col[data-fieldname="appraisal_status"] {
+	display: none !important;
+	width: 0 !important;
+	max-width: 0 !important;
+	min-width: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: none !important;
+	overflow: hidden !important;
+	visibility: hidden !important;
+}
+
+/* Standard Filter visibility toggle between Plan mode and Appraisal mode in List View */
+.pms-appraisal-list-view.pms-mode-plan .standard-filter-section [data-fieldname="appraisal_status"],
+.pms-appraisal-list-view.pms-mode-plan .filter-section [data-fieldname="appraisal_status"],
+.pms-appraisal-list-view.pms-mode-plan .page-form [data-fieldname="appraisal_status"] {
+	display: none !important;
+}
+
+.pms-appraisal-list-view.pms-mode-appraisal .standard-filter-section [data-fieldname="plan_status"],
+.pms-appraisal-list-view.pms-mode-appraisal .filter-section [data-fieldname="plan_status"],
+.pms-appraisal-list-view.pms-mode-appraisal .page-form [data-fieldname="plan_status"] {
+	display: none !important;
+}

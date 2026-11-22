@@ -1,0 +1,164 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:grade_group_name",
+ "creation": "2026-11-20 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "grade_group_name",
+  "description",
+  "col_brk_1",
+  "target_weight",
+  "competency_weight",
+  "sec_brk_competencies",
+  "competencies"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "grade_group_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Grade Group Name / Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "col_brk_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "default": "60.00",
+   "description": "Total weightage for targets/goals (e.g. 60%)",
+   "fieldname": "target_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Target Weight (%)",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "default": "40.00",
+   "description": "Total weightage for competencies (e.g. 40%)",
+   "fieldname": "competency_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Competency Weight (%)",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sec_brk_competencies",
+   "fieldtype": "Section Break",
+   "label": "Default Competencies & Definitions"
+  },
+  {
+   "fieldname": "competencies",
+   "fieldtype": "Table",
+   "label": "Competencies",
+   "options": "PMS Competency Item"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-11-20 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "GDL PMS",
+ "name": "PMS Grade Group",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "HR Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 0,
+   "print": 1,
+   "read": 1,
+   "role": "HR User",
+   "share": 0,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 0,
+   "print": 1,
+   "read": 1,
+   "role": "PMS Employee",
+   "share": 0,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 0,
+   "print": 1,
+   "read": 1,
+   "role": "PMS Supervisor",
+   "share": 0,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 0,
+   "print": 1,
+   "read": 1,
+   "role": "PMS Supervisor 2",
+   "share": 0,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 0,
+   "print": 1,
+   "read": 1,
+   "role": "PMS Reviewer",
+   "share": 0,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 0,
+   "print": 1,
+   "read": 1,
+   "role": "PMS PERC",
+   "share": 0,
+   "write": 0
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
+

@@ -1,0 +1,145 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-11-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tab_os",
+  "sec_os_weights",
+  "os_target_weight",
+  "col_os",
+  "os_competency_weight",
+  "sec_os_comps",
+  "os_competencies",
+  "tab_ps",
+  "sec_ps_weights",
+  "ps_target_weight",
+  "col_ps",
+  "ps_competency_weight",
+  "sec_ps_comps",
+  "ps_competencies"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_os",
+   "fieldtype": "Tab Break",
+   "label": "Operating Staff (OS_ESP)"
+  },
+  {
+   "fieldname": "sec_os_weights",
+   "fieldtype": "Section Break",
+   "label": "Weightage Distribution (OS_ESP)"
+  },
+  {
+   "default": "50",
+   "description": "Weightage for targets / goals (e.g. 50%)",
+   "fieldname": "os_target_weight",
+   "fieldtype": "Float",
+   "label": "Target Weightage (%)",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_os",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "50",
+   "description": "Total weightage for competencies (e.g. 50%)",
+   "fieldname": "os_competency_weight",
+   "fieldtype": "Float",
+   "label": "Competency Weightage (%)",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sec_os_comps",
+   "fieldtype": "Section Break",
+   "label": "Competencies, Definitions & Individual Weights (OS_ESP)"
+  },
+  {
+   "fieldname": "os_competencies",
+   "fieldtype": "Table",
+   "label": "Operating Staff Competencies",
+   "options": "PMS Competency Item"
+  },
+  {
+   "fieldname": "tab_ps",
+   "fieldtype": "Tab Break",
+   "label": "Professional Staff (PS_CS)"
+  },
+  {
+   "fieldname": "sec_ps_weights",
+   "fieldtype": "Section Break",
+   "label": "Weightage Distribution (PS_CS)"
+  },
+  {
+   "default": "60",
+   "description": "Weightage for targets / goals (e.g. 60%)",
+   "fieldname": "ps_target_weight",
+   "fieldtype": "Float",
+   "label": "Target Weightage (%)",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_ps",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "40",
+   "description": "Total weightage for competencies (e.g. 40%)",
+   "fieldname": "ps_competency_weight",
+   "fieldtype": "Float",
+   "label": "Competency Weightage (%)",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sec_ps_comps",
+   "fieldtype": "Section Break",
+   "label": "Competencies, Definitions & Individual Weights (PS_CS)"
+  },
+  {
+   "fieldname": "ps_competencies",
+   "fieldtype": "Table",
+   "label": "Professional Staff Competencies",
+   "options": "PMS Competency Item"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-11-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "GDL PMS",
+ "name": "PMS Manage Competencies",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "HR Admin",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
+
