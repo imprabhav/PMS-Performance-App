@@ -1507,6 +1507,21 @@ function build_plan_history_html(frm, history) {
 	`;
 }
 
+function get_cached_current_emp() {
+	if (window._pms_current_emp) return window._pms_current_emp;
+	try {
+		let user_ctx = sessionStorage.getItem("pms_user_context_" + (frappe.session.user || "default"));
+		if (user_ctx) {
+			let parsed = JSON.parse(user_ctx);
+			if (parsed && parsed.employee_id) {
+				window._pms_current_emp = parsed.employee_id;
+				return parsed.employee_id;
+			}
+		}
+	} catch(e) {}
+	return null;
+}
+
 function render_plan_agreement(frm) {
 	if (!frm.fields_dict["plan_agreement_html"]) return;
 
@@ -1642,7 +1657,18 @@ function render_plan_agreement(frm) {
 	let current_val = frm.doc.plan_agreement || "";
 	let is_admin = frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("Administrator") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager") || (frappe.session && frappe.session.user === "Administrator");
 	let is_locked = frm.doc.locked || (frm.doc.plan_status === "Approved" && frm.doc.workflow_state === "Monitoring") || (frm.doc.workflow_state === "Appraisal Open") || (frm.doc.workflow_state === "Appraisal Completed");
-	let is_owner_or_admin = (frm._is_my_doc !== undefined ? frm._is_my_doc : (frm.is_new() || (frm._current_emp && frm._current_emp === frm.doc.employee))) || is_admin;
+	
+	let current_emp = frm._current_emp || window._pms_current_emp || get_cached_current_emp();
+	if (!frm._current_emp && current_emp) {
+		frm._current_emp = current_emp;
+	}
+	let is_my_doc = (frm._is_my_doc !== undefined)
+		? frm._is_my_doc
+		: (frm.is_new() || (current_emp && current_emp === frm.doc.employee) || (frappe.session.user && frm.doc.owner === frappe.session.user));
+	if (frm._is_my_doc === undefined && is_my_doc) {
+		frm._is_my_doc = true;
+	}
+	let is_owner_or_admin = is_my_doc || is_admin;
 	let is_editable = (!is_locked && is_owner_or_admin);
 
 	let is_resubmission = Boolean(frm.doc.first_submission_done || frm.doc.plan_revision_remark || frm.doc.plan_rejection_remark || frm.doc.plan_revision_changes);
@@ -1813,6 +1839,19 @@ function render_plan_agreement(frm) {
 	}
 
 	let html = `
+		<style>
+			.pms-agreement-box {
+				cursor: pointer !important;
+				user-select: none;
+			}
+			.pms-agreement-box:hover {
+				border-color: #2563eb !important;
+				background-color: #f8fafc !important;
+			}
+			.pms-agreement-box.pms-agreement-active:hover {
+				filter: brightness(0.97);
+			}
+		</style>
 		<div class="pms-agreement-container" style="margin-top: 15px; margin-bottom: 25px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
 			<div style="font-weight: 600; font-size: 13px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
 				<span>
@@ -1827,10 +1866,21 @@ function render_plan_agreement(frm) {
 	let $wrapper = $(frm.fields_dict["plan_agreement_html"].wrapper);
 	$wrapper.html(html);
 
-	if (is_editable) {
+	if (!is_locked) {
 		$wrapper.off("click", ".pms-agreement-box").on("click", ".pms-agreement-box", function(e) {
 			e.preventDefault();
 			e.stopPropagation();
+
+			let cur_emp = frm._current_emp || window._pms_current_emp || get_cached_current_emp();
+			let is_my = (frm._is_my_doc !== undefined)
+				? frm._is_my_doc
+				: (frm.is_new() || (cur_emp && cur_emp === frm.doc.employee) || (frappe.session.user && frm.doc.owner === frappe.session.user));
+			let is_adm = frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("Administrator") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager") || (frappe.session && frappe.session.user === "Administrator");
+
+			if (!is_my && !is_adm && frm._is_my_doc === false) {
+				return;
+			}
+
 			let target_val = $(this).attr("data-val");
 			let new_val = (frm.doc.plan_agreement === target_val) ? "" : target_val;
 			frm.doc.plan_agreement = new_val;
@@ -2105,6 +2155,9 @@ frappe.ui.form.on("PMS Appraisal", {
 			callback: function(r) {
 				let current_emp = r && r.message && r.message.name;
 				frm._current_emp = current_emp;
+				if (current_emp) {
+					window._pms_current_emp = current_emp;
+				}
 				let is_my_doc = frm.is_new() || (current_emp && (current_emp === frm.doc.employee));
 				let is_admin = frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager");
 				let is_supervisor = (current_emp && current_emp === frm.doc.supervisor_snapshot) || is_admin;
@@ -2113,6 +2166,9 @@ frappe.ui.form.on("PMS Appraisal", {
 				frm._is_supervisor = is_supervisor;
 				frm._is_reviewer = is_reviewer;
 				frm._is_my_doc = is_my_doc;
+
+				// Refresh agreement section with confirmed employee context
+				render_plan_agreement(frm);
 				let is_supervisor_2_only = frappe.user_roles.includes("Supervisor 2") && !is_admin && !frappe.user_roles.includes("Supervisor") && !frappe.user_roles.includes("Reviewer");
 				let is_supervisor_2_for_this_doc = (current_emp && frm.doc.supervisor_2_snapshot === current_emp) && !is_my_doc && !is_admin;
 
