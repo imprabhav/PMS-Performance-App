@@ -1,3 +1,23 @@
+function get_cached_pms_context() {
+	if (window._pms_user_context) return window._pms_user_context;
+	try {
+		let stored = sessionStorage.getItem("pms_user_context_" + (frappe.session.user || "default"));
+		if (stored) {
+			window._pms_user_context = JSON.parse(stored);
+			return window._pms_user_context;
+		}
+	} catch(e) {}
+	return null;
+}
+
+function set_cached_pms_context(data) {
+	if (!data) return;
+	window._pms_user_context = data;
+	try {
+		sessionStorage.setItem("pms_user_context_" + (frappe.session.user || "default"), JSON.stringify(data));
+	} catch(e) {}
+}
+
 function sync_pms_standard_filters(listview) {
 	if (!listview || !listview.page || !listview.page.fields_dict) return;
 	let is_appraisal = (listview._current_view_mode === "appraisal");
@@ -7,11 +27,17 @@ function sync_pms_standard_filters(listview) {
 		listview.page.fields_dict.amendment_window_open.$wrapper.hide();
 	}
 
+	// Mute refresh triggers on standard filter changes during sync
+	if (listview.filter_area) {
+		listview.filter_area.trigger_refresh = false;
+	}
+
 	if (is_appraisal) {
 		listview.$page && listview.$page.removeClass("pms-mode-plan").addClass("pms-mode-appraisal");
 		$(listview.wrapper).removeClass("pms-mode-plan").addClass("pms-mode-appraisal");
 		if (listview.page.fields_dict.plan_status && listview.page.fields_dict.plan_status.$wrapper) {
 			listview.page.fields_dict.plan_status.$wrapper.hide();
+			listview.page.fields_dict.plan_status.set_value("");
 		}
 		if (listview.page.fields_dict.appraisal_status && listview.page.fields_dict.appraisal_status.$wrapper) {
 			listview.page.fields_dict.appraisal_status.$wrapper.show();
@@ -22,6 +48,7 @@ function sync_pms_standard_filters(listview) {
 		$(listview.wrapper).removeClass("pms-mode-appraisal").addClass("pms-mode-plan");
 		if (listview.page.fields_dict.appraisal_status && listview.page.fields_dict.appraisal_status.$wrapper) {
 			listview.page.fields_dict.appraisal_status.$wrapper.hide();
+			listview.page.fields_dict.appraisal_status.set_value("");
 		}
 		if (listview.page.fields_dict.plan_status && listview.page.fields_dict.plan_status.$wrapper) {
 			listview.page.fields_dict.plan_status.$wrapper.show();
@@ -253,76 +280,8 @@ frappe.listview_settings['PMS Appraisal'] = {
 			});
 		};
 
+		attach_pms_view_mode_methods(listview);
 		setup_pms_scope_system(listview);
-
-		listview.apply_pms_view_mode = function(mode, force_reload, extra_filters) {
-			if (!mode) mode = "plan";
-			listview._current_view_mode = mode;
-			localStorage.setItem("pms_view_mode", mode);
-			let is_appraisal = (mode === "appraisal");
-
-			// 1. Update Title
-			if (listview.page && listview.page.set_title) {
-				listview.page.set_title(is_appraisal ? __("PMS Appraisal Form") : __("PMS Performance Plan"));
-			}
-
-			// 2. Update In-page Tab Buttons
-			let $tabs = listview.$page.find('.pms-view-mode-tabs');
-			if ($tabs.length) {
-				if (is_appraisal) {
-					$tabs.find('.tab-plans').removeClass('btn-primary text-white').addClass('btn-default');
-					$tabs.find('.tab-appraisals').removeClass('btn-default').addClass('btn-primary text-white');
-				} else {
-					$tabs.find('.tab-plans').removeClass('btn-default').addClass('btn-primary text-white');
-					$tabs.find('.tab-appraisals').removeClass('btn-primary text-white').addClass('btn-default');
-				}
-			}
-
-			// 3. Update Primary Action Button
-			let is_supervisor_2_only = frappe.user_roles && frappe.user_roles.includes("Supervisor 2") &&
-				!frappe.user_roles.includes("System Manager") &&
-				!frappe.user_roles.includes("HR Admin") &&
-				!frappe.user_roles.includes("HR Manager") &&
-				!frappe.user_roles.includes("Employee") &&
-				!frappe.user_roles.includes("Supervisor") &&
-				!frappe.user_roles.includes("Reviewer");
-
-			if (listview.page && listview.page.btn_primary) {
-				if (is_appraisal || is_supervisor_2_only) {
-					listview.page.btn_primary.hide();
-				} else {
-					listview.page.btn_primary.show();
-					listview.page.set_primary_action(__("Add PMS Performance Plan"), function() {
-						frappe.new_doc("PMS Appraisal");
-					});
-				}
-			}
-
-			// 4. Update Sidebar Active Item
-			update_pms_sidebar_active(mode);
-
-			// 5. Update Columns & Re-render Header
-			if (listview.setup_columns) {
-				listview.setup_columns();
-				if (listview.render_header) {
-					listview.render_header(true);
-				}
-				if (listview.apply_column_widths) {
-					listview.apply_column_widths();
-				}
-			}
-
-			// 6. Update Scope Bar UI
-			if (listview.render_pms_scope_bar) {
-				listview.render_pms_scope_bar();
-			}
-
-			// 7. Toggle Status Standard Filter (plan_status in Plan mode, appraisal_status in Appraisal mode)
-			sync_pms_standard_filters(listview);
-
-			// 8. Update Combined Filters
-			listview.apply_combined_filters(force_reload, extra_filters);
-		};
 
 		let view_mode = "plan";
 		if (frappe.route_options && frappe.route_options.view_mode) {
@@ -352,7 +311,7 @@ frappe.listview_settings['PMS Appraisal'] = {
 			listview._current_plan_scope = "pending";
 		}
 
-		listview.apply_pms_view_mode(view_mode, false, extra_filters);
+		listview.apply_pms_view_mode(view_mode, true, extra_filters);
 
 		// Ensure row clicks remember the current view mode
 		$(listview.wrapper).on('click', '.list-row, .list-subject a, .list-row-container', function() {
@@ -361,71 +320,8 @@ frappe.listview_settings['PMS Appraisal'] = {
 	},
 
 	refresh: function(listview) {
+		attach_pms_view_mode_methods(listview);
 		setup_pms_scope_system(listview);
-
-		if (!listview.apply_pms_view_mode) {
-			listview.apply_pms_view_mode = function(mode, force_reload, extra_filters) {
-				if (!mode) mode = "plan";
-				listview._current_view_mode = mode;
-				localStorage.setItem("pms_view_mode", mode);
-				let is_appraisal = (mode === "appraisal");
-
-				if (listview.page && listview.page.set_title) {
-					listview.page.set_title(is_appraisal ? __("PMS Appraisal Form") : __("PMS Performance Plan"));
-				}
-
-				let $tabs = listview.$page.find('.pms-view-mode-tabs');
-				if ($tabs.length) {
-					if (is_appraisal) {
-						$tabs.find('.tab-plans').removeClass('btn-primary text-white').addClass('btn-default');
-						$tabs.find('.tab-appraisals').removeClass('btn-default').addClass('btn-primary text-white');
-					} else {
-						$tabs.find('.tab-plans').removeClass('btn-default').addClass('btn-primary text-white');
-						$tabs.find('.tab-appraisals').removeClass('btn-primary text-white').addClass('btn-default');
-					}
-				}
-
-				let is_supervisor_2_only = frappe.user_roles && frappe.user_roles.includes("Supervisor 2") &&
-					!frappe.user_roles.includes("System Manager") &&
-					!frappe.user_roles.includes("HR Admin") &&
-					!frappe.user_roles.includes("HR Manager") &&
-					!frappe.user_roles.includes("Employee") &&
-					!frappe.user_roles.includes("Supervisor") &&
-					!frappe.user_roles.includes("Reviewer");
-
-				if (listview.page && listview.page.btn_primary) {
-					if (is_appraisal || is_supervisor_2_only) {
-						listview.page.btn_primary.hide();
-					} else {
-						listview.page.btn_primary.show();
-						listview.page.set_primary_action(__("Add PMS Performance Plan"), function() {
-							frappe.new_doc("PMS Appraisal");
-						});
-					}
-				}
-
-				update_pms_sidebar_active(mode);
-
-				if (listview.setup_columns) {
-					listview.setup_columns();
-					if (listview.render_header) {
-						listview.render_header(true);
-					}
-					if (listview.apply_column_widths) {
-						listview.apply_column_widths();
-					}
-				}
-
-				if (listview.render_pms_scope_bar) {
-					listview.render_pms_scope_bar();
-				}
-
-				// Toggle Status Standard Filter
-				sync_pms_standard_filters(listview);
-
-				listview.apply_combined_filters(force_reload, extra_filters);
-			};
-		}
 
 		listview.$page && listview.$page.addClass("pms-appraisal-list-view");
 		listview.$result && listview.$result.addClass("pms-appraisal-list-view");
@@ -457,16 +353,10 @@ frappe.listview_settings['PMS Appraisal'] = {
 			listview.page.page_actions.prepend($tabs);
 
 			$tabs.find('.tab-plans').on('click', function() {
-				if (listview.page && listview.page.fields_dict && listview.page.fields_dict.appraisal_status) {
-					listview.page.fields_dict.appraisal_status.set_value("");
-				}
 				listview.apply_pms_view_mode("plan", true);
 			});
 
 			$tabs.find('.tab-appraisals').on('click', function() {
-				if (listview.page && listview.page.fields_dict && listview.page.fields_dict.plan_status) {
-					listview.page.fields_dict.plan_status.set_value("");
-				}
 				listview.apply_pms_view_mode("appraisal", true);
 			});
 		}
@@ -679,11 +569,126 @@ function is_managerial_user() {
 	].includes(r));
 }
 
+function attach_pms_view_mode_methods(listview) {
+	if (listview._pms_methods_attached) return;
+	listview._pms_methods_attached = true;
+
+	listview.set_pms_filters_and_refresh = function(filters_to_add) {
+		if (!listview.filter_area) {
+			listview.refresh();
+			return Promise.resolve();
+		}
+
+		listview._is_applying_pms_filters = true;
+		listview.filter_area.trigger_refresh = false;
+
+		if (listview.filter_area.filter_list) {
+			listview.filter_area.filter_list.clear_filters();
+		}
+
+		let promise = (filters_to_add && filters_to_add.length && listview.filter_area.filter_list)
+			? listview.filter_area.filter_list.add_filters(filters_to_add)
+			: Promise.resolve();
+
+		return promise.then(() => {
+			listview.filter_area.trigger_refresh = true;
+			if (listview.filter_area.filter_list) {
+				listview.filter_area.filter_list.update_filter_button();
+			}
+			listview.start = 0;
+			listview.refresh();
+			setTimeout(() => {
+				listview._is_applying_pms_filters = false;
+			}, 150);
+		}).catch(err => {
+			console.error("Error setting PMS filters:", err);
+			listview.filter_area.trigger_refresh = true;
+			listview._is_applying_pms_filters = false;
+			listview.refresh();
+		});
+	};
+
+	listview.apply_pms_view_mode = function(mode, force_reload, extra_filters) {
+		if (!mode) mode = "plan";
+		listview._current_view_mode = mode;
+		localStorage.setItem("pms_view_mode", mode);
+		let is_appraisal = (mode === "appraisal");
+
+		// 1. Update Title
+		if (listview.page && listview.page.set_title) {
+			listview.page.set_title(is_appraisal ? __("PMS Appraisal Form") : __("PMS Performance Plan"));
+		}
+
+		// 2. Update In-page Tab Buttons
+		let $tabs = listview.$page.find('.pms-view-mode-tabs');
+		if ($tabs.length) {
+			if (is_appraisal) {
+				$tabs.find('.tab-plans').removeClass('btn-primary text-white').addClass('btn-default');
+				$tabs.find('.tab-appraisals').removeClass('btn-default').addClass('btn-primary text-white');
+			} else {
+				$tabs.find('.tab-plans').removeClass('btn-default').addClass('btn-primary text-white');
+				$tabs.find('.tab-appraisals').removeClass('btn-primary text-white').addClass('btn-default');
+			}
+		}
+
+		// 3. Update Primary Action Button
+		let is_supervisor_2_only = frappe.user_roles && frappe.user_roles.includes("Supervisor 2") &&
+			!frappe.user_roles.includes("System Manager") &&
+			!frappe.user_roles.includes("HR Admin") &&
+			!frappe.user_roles.includes("HR Manager") &&
+			!frappe.user_roles.includes("Employee") &&
+			!frappe.user_roles.includes("Supervisor") &&
+			!frappe.user_roles.includes("Reviewer");
+
+		if (listview.page && listview.page.btn_primary) {
+			if (is_appraisal || is_supervisor_2_only) {
+				listview.page.btn_primary.hide();
+			} else {
+				listview.page.btn_primary.show();
+				listview.page.set_primary_action(__("Add PMS Performance Plan"), function() {
+					frappe.new_doc("PMS Appraisal");
+				});
+			}
+		}
+
+		// 4. Update Sidebar Active Item
+		update_pms_sidebar_active(mode);
+
+		// 5. Update Columns & Re-render Header
+		if (listview.setup_columns) {
+			listview.setup_columns();
+			if (listview.render_header) {
+				listview.render_header(true);
+			}
+			if (listview.apply_column_widths) {
+				listview.apply_column_widths();
+			}
+		}
+
+		// 6. Update Scope Bar UI
+		if (listview.render_pms_scope_bar) {
+			listview.render_pms_scope_bar();
+		}
+
+		// 7. Toggle Status Standard Filter (plan_status in Plan mode, appraisal_status in Appraisal mode)
+		sync_pms_standard_filters(listview);
+
+		// 8. Update Combined Filters and refresh list atomically
+		listview.apply_combined_filters(force_reload !== false, extra_filters);
+	};
+}
+
 function setup_pms_scope_system(listview) {
 	let is_hr_admin = (frappe.user_roles || []).some(r => ["HR Admin", "HR Manager"].includes(r));
 	let can_team_initial = !is_hr_admin && is_managerial_user();
 
-	// 1. Fetch user performance context
+	// 1. Immediately initialize context synchronously from cache
+	let cached_ctx = get_cached_pms_context();
+	if (cached_ctx) {
+		listview._pms_context = cached_ctx;
+	}
+
+	// 2. Fetch / refresh user performance context
 	if (!listview._pms_context_loading) {
 		listview._pms_context_loading = true;
 		frappe.call({
@@ -691,7 +696,10 @@ function setup_pms_scope_system(listview) {
 			callback: function(r) {
 				listview._pms_context_loading = false;
 				if (r && r.message) {
+					let had_cached = !!listview._pms_context;
 					listview._pms_context = r.message;
+					set_cached_pms_context(r.message);
+
 					let can_see_team = !is_hr_admin && (r.message.can_see_team && is_managerial_user());
 					if (!can_see_team) {
 						listview._current_plan_scope = "all";
@@ -700,7 +708,7 @@ function setup_pms_scope_system(listview) {
 						if (listview.render_pms_scope_bar) {
 							listview.render_pms_scope_bar();
 						}
-						if (listview._current_plan_scope && listview._current_plan_scope !== "all") {
+						if (!had_cached && listview._current_plan_scope && listview._current_plan_scope !== "all") {
 							listview.apply_combined_filters(true);
 						}
 					}
@@ -709,7 +717,7 @@ function setup_pms_scope_system(listview) {
 		});
 	}
 
-	// 2. Initialize scope: normal employees and HR Admin must ALWAYS default to "all" with no scope filters
+	// 3. Initialize scope: normal employees and HR Admin must ALWAYS default to "all" with no scope filters
 	if (is_hr_admin || !can_team_initial) {
 		listview._current_plan_scope = "all";
 		let user_key = "pms_plan_scope_" + (frappe.session.user || "default");
@@ -731,7 +739,7 @@ function setup_pms_scope_system(listview) {
 		listview._current_plan_scope = initial_scope;
 	}
 
-	// 3. Render Scope Bar UI
+	// 4. Render Scope Bar UI
 	listview.render_pms_scope_bar = function() {
 		let is_hr_admin = (frappe.user_roles || []).some(r => ["HR Admin", "HR Manager"].includes(r));
 		if (is_hr_admin) {
@@ -739,7 +747,7 @@ function setup_pms_scope_system(listview) {
 			return;
 		}
 
-		let ctx = listview._pms_context;
+		let ctx = listview._pms_context || get_cached_pms_context();
 		let can_team = is_managerial_user() && (ctx ? ctx.can_see_team : true);
 		if (!can_team) {
 			listview.$page.find('.pms-scope-bar').remove();
@@ -847,63 +855,31 @@ function setup_pms_scope_system(listview) {
 		$bar.find('.pms-scope-hint').text(hint_text);
 	};
 
-	// 4. Combined Filter Functionality
+	// 5. Combined Filter Functionality (Atomic, Single-Click)
 	listview.apply_combined_filters = function(force_reload, extra_filters) {
-		if (!listview.filter_area) {
-			if (force_reload) listview.refresh();
-			return;
-		}
-
-		if (listview._is_applying_pms_filters) return;
-
-		let current_filters = (listview.filter_area.get && listview.filter_area.get()) || [];
-		let has_user_status_filter = current_filters.some(f => {
-			let fn = Array.isArray(f) ? f[1] : (f && f.fieldname ? f.fieldname : "");
-			return fn === "appraisal_status" || fn === "plan_status";
-		});
-
-		// If user manually applied an appraisal_status or plan_status filter and this is a normal refresh,
-		// DO NOT clear or wipe the user's selected dropdown filter!
-		if (!force_reload && has_user_status_filter) {
-			return;
-		}
-
 		let is_hr_admin = (frappe.user_roles || []).some(r => ["HR Admin", "HR Manager"].includes(r));
-		let ctx = listview._pms_context || {};
+		let ctx = listview._pms_context || get_cached_pms_context() || {};
 		let is_appraisal = (listview._current_view_mode === "appraisal");
 		let can_team = !is_hr_admin && is_managerial_user() && (ctx.can_see_team !== false);
 
 		// If user is a normal employee or HR Admin, do NOT activate any team/my filters!
 		if (!can_team) {
 			listview._current_plan_scope = "all";
+			let filters_to_add = [];
 			if (is_appraisal) {
-				let current_filters = (listview.filter_area.get && listview.filter_area.get()) || [];
-				let has_appraisal_status_filter = current_filters.some(f => {
-					let fn = Array.isArray(f) ? f[1] : (f && f.fieldname ? f.fieldname : "");
-					return fn === "appraisal_status";
-				});
-				if (!has_appraisal_status_filter && listview.filter_area.filter_list) {
-					let existing = listview.filter_area.filter_list.get_filter("appraisal_status");
-					if (!existing) {
-						listview.filter_area.filter_list.add_filters([["PMS Appraisal", "appraisal_status", "!=", "Not Activated", false]]);
-					}
-				}
-			} else {
-				if (listview.filter_area && listview.filter_area.filter_list) {
-					let not_act_filter = listview.filter_area.filter_list.get_filter("appraisal_status");
-					if (not_act_filter) {
-						not_act_filter.remove();
-					}
+				let has_selected_status = listview.page && listview.page.fields_dict && listview.page.fields_dict.appraisal_status && listview.page.fields_dict.appraisal_status.get_value();
+				if (!has_selected_status) {
+					filters_to_add.push(["PMS Appraisal", "appraisal_status", "!=", "Not Activated", false]);
 				}
 			}
-			return;
+			if (extra_filters && Array.isArray(extra_filters)) {
+				filters_to_add = filters_to_add.concat(extra_filters);
+			}
+			return listview.set_pms_filters_and_refresh(filters_to_add);
 		}
 
 		let scope = listview._current_plan_scope || "team";
 		let filters_to_add = [];
-		if (is_appraisal && !has_user_status_filter) {
-			filters_to_add.push(["PMS Appraisal", "appraisal_status", "!=", "Not Activated", false]);
-		}
 
 		if (scope === "my") {
 			if (ctx.employee_id) {
@@ -911,9 +887,21 @@ function setup_pms_scope_system(listview) {
 			} else if (frappe.session.user && frappe.session.user !== "Administrator") {
 				filters_to_add.push(["PMS Appraisal", "owner", "=", frappe.session.user, false]);
 			}
+			if (is_appraisal) {
+				let has_selected_status = listview.page && listview.page.fields_dict && listview.page.fields_dict.appraisal_status && listview.page.fields_dict.appraisal_status.get_value();
+				if (!has_selected_status) {
+					filters_to_add.push(["PMS Appraisal", "appraisal_status", "!=", "Not Activated", false]);
+				}
+			}
 		} else if (scope === "team") {
 			if (ctx.employee_id) {
 				filters_to_add.push(["PMS Appraisal", "employee", "!=", ctx.employee_id, false]);
+			}
+			if (is_appraisal) {
+				let has_selected_status = listview.page && listview.page.fields_dict && listview.page.fields_dict.appraisal_status && listview.page.fields_dict.appraisal_status.get_value();
+				if (!has_selected_status) {
+					filters_to_add.push(["PMS Appraisal", "appraisal_status", "!=", "Not Activated", false]);
+				}
 			}
 		} else if (scope === "pending") {
 			if (ctx.employee_id) {
@@ -936,21 +924,19 @@ function setup_pms_scope_system(listview) {
 					filters_to_add.push(["PMS Appraisal", "plan_status", "in", ["Pending Supervisor Approval", "Pending Reviewer Approval"], false]);
 				}
 			}
+		} else if (scope === "all") {
+			if (is_appraisal) {
+				let has_selected_status = listview.page && listview.page.fields_dict && listview.page.fields_dict.appraisal_status && listview.page.fields_dict.appraisal_status.get_value();
+				if (!has_selected_status) {
+					filters_to_add.push(["PMS Appraisal", "appraisal_status", "!=", "Not Activated", false]);
+				}
+			}
 		}
 
 		if (extra_filters && Array.isArray(extra_filters)) {
 			filters_to_add = filters_to_add.concat(extra_filters);
 		}
 
-		// Update only tag filters without clearing standard filter inputs
-		if (force_reload && listview.filter_area && listview.filter_area.filter_list) {
-			listview._is_applying_pms_filters = true;
-			listview.filter_area.filter_list.clear_filters();
-			if (filters_to_add.length) {
-				listview.filter_area.filter_list.add_filters(filters_to_add);
-			}
-			listview.refresh();
-			setTimeout(() => { listview._is_applying_pms_filters = false; }, 200);
-		}
+		return listview.set_pms_filters_and_refresh(filters_to_add);
 	};
 }

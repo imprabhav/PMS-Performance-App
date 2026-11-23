@@ -515,16 +515,18 @@
         var r1 = route[1] || '';
         var r2 = (route[2] || '').toLowerCase();
 
-        var is_list_view_route = (r0 === 'list' && r1 === 'PMS Appraisal') ||
+        var is_list_view_route = (r0 === 'list' && (r1 === 'PMS Appraisal' || r1.toLowerCase() === 'pms appraisal' || r1.toLowerCase() === 'pms-appraisal')) ||
             (r0 === 'app' && (r1 === 'pms-appraisal' || r1 === 'PMS Appraisal') && (route.length === 2 || r2 === 'view' || r2 === 'list'));
 
-        var is_list_visible = typeof cur_list !== 'undefined' && cur_list && cur_list.doctype === 'PMS Appraisal' &&
-            cur_list.wrapper && $(cur_list.wrapper).is(':visible');
+        var active_list = (typeof cur_list !== 'undefined' && cur_list && cur_list.doctype === 'PMS Appraisal') ? cur_list :
+            (window.frappe && frappe.views && frappe.views.list_view && frappe.views.list_view['PMS Appraisal']) ? frappe.views.list_view['PMS Appraisal'] : null;
+
+        var is_list_visible = active_list && active_list.wrapper && $(active_list.wrapper).is(':visible');
 
         var is_actually_on_list = is_list_view_route && is_list_visible;
 
-        if (is_actually_on_list && typeof cur_list.apply_pms_view_mode === 'function') {
-            cur_list.apply_pms_view_mode(target_mode, true);
+        if (is_actually_on_list && typeof active_list.apply_pms_view_mode === 'function') {
+            active_list.apply_pms_view_mode(target_mode, true);
         } else if (window.frappe && frappe.set_route) {
             frappe.set_route('List', 'PMS Appraisal');
         } else {
