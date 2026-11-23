@@ -27,7 +27,7 @@ function sync_pms_standard_filters(listview) {
 		listview.page.fields_dict.amendment_window_open.$wrapper.hide();
 	}
 
-	// Mute refresh triggers on standard filter changes during sync
+	// Mute refresh triggers on standard filter changes only during mode sync
 	if (listview.filter_area) {
 		listview.filter_area.trigger_refresh = false;
 	}
@@ -37,7 +37,9 @@ function sync_pms_standard_filters(listview) {
 		$(listview.wrapper).removeClass("pms-mode-plan").addClass("pms-mode-appraisal");
 		if (listview.page.fields_dict.plan_status && listview.page.fields_dict.plan_status.$wrapper) {
 			listview.page.fields_dict.plan_status.$wrapper.hide();
-			listview.page.fields_dict.plan_status.set_value("");
+			if (listview.page.fields_dict.plan_status.get_value()) {
+				listview.page.fields_dict.plan_status.set_value("");
+			}
 		}
 		if (listview.page.fields_dict.appraisal_status && listview.page.fields_dict.appraisal_status.$wrapper) {
 			listview.page.fields_dict.appraisal_status.$wrapper.show();
@@ -48,7 +50,9 @@ function sync_pms_standard_filters(listview) {
 		$(listview.wrapper).removeClass("pms-mode-appraisal").addClass("pms-mode-plan");
 		if (listview.page.fields_dict.appraisal_status && listview.page.fields_dict.appraisal_status.$wrapper) {
 			listview.page.fields_dict.appraisal_status.$wrapper.hide();
-			listview.page.fields_dict.appraisal_status.set_value("");
+			if (listview.page.fields_dict.appraisal_status.get_value()) {
+				listview.page.fields_dict.appraisal_status.set_value("");
+			}
 		}
 		if (listview.page.fields_dict.plan_status && listview.page.fields_dict.plan_status.$wrapper) {
 			listview.page.fields_dict.plan_status.$wrapper.show();
@@ -57,6 +61,28 @@ function sync_pms_standard_filters(listview) {
 			listview.page.fields_dict.plan_status.$wrapper.find('option[value="Monitoring"]').remove();
 		}
 	}
+
+	// Always restore trigger_refresh so standard filter selections instantly filter the list
+	if (listview.filter_area) {
+		listview.filter_area.trigger_refresh = true;
+	}
+
+	// Explicitly bind change handlers on standard filters to ensure immediate refresh on user selection
+	['plan_status', 'appraisal_status', 'calendar_year', 'employee_name', 'name'].forEach(fn => {
+		let fld = listview.page && listview.page.fields_dict && listview.page.fields_dict[fn];
+		if (fld && !fld._pms_change_bound) {
+			fld._pms_change_bound = true;
+			if (fld.$input) {
+				fld.$input.on('change', function() {
+					if (listview.filter_area) {
+						listview.filter_area.trigger_refresh = true;
+					}
+					listview.start = 0;
+					listview.refresh();
+				});
+			}
+		}
+	});
 }
 
 function update_pms_sidebar_active(mode) {
