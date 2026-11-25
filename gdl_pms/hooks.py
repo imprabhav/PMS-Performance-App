@@ -82,6 +82,7 @@ boot_session = "gdl_pms.auth_hooks.boot_session"
 
 # before_install = "gdl_pms.install.before_install"
 # after_install = "gdl_pms.install.after_install"
+after_migrate = ["gdl_pms.patches.v1_0.setup_pms_permissions_and_fields.execute"]
 
 # Uninstallation
 # ------------

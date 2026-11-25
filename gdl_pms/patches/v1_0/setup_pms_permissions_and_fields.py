@@ -69,16 +69,17 @@ def setup_custom_fields():
         "in_list_view": 1
     })
 
-    # Employee.employment_type
-    create_custom_field("Employee", {
-        "fieldname": "employment_type",
-        "label": "Employee Type",
-        "fieldtype": "Select",
-        "options": "Full time employee\nContract\nProbation",
-        "insert_after": "grade_group",
-        "reqd": 1,
-        "in_list_view": 1
-    })
+    # Employee.employment_type (do not overwrite existing HRMS Link field if already present)
+    if not frappe.db.exists("Custom Field", {"dt": "Employee", "fieldname": "employment_type"}) and not frappe.get_meta("Employee").has_field("employment_type"):
+        create_custom_field("Employee", {
+            "fieldname": "employment_type",
+            "label": "Employee Type",
+            "fieldtype": "Select",
+            "options": "Full time employee\nContract\nProbation",
+            "insert_after": "grade_group",
+            "reqd": 1,
+            "in_list_view": 1
+        })
 
     # Employee.reviewer
     create_custom_field("Employee", {
