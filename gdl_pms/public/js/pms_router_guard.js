@@ -136,18 +136,15 @@
         var orig_clear = frappe.breadcrumbs.clear;
         frappe.breadcrumbs.clear = function () {
             this.$breadcrumbs = $(".navbar-breadcrumbs").empty();
-            var target = get_pms_target_route();
-            var home_url = target ? ("/desk/" + target) : "/desk";
-            this.append_breadcrumb_element(home_url, frappe.utils.icon("home"), "pms-home-crumb");
+            // Home breadcrumb always links to /desk (All Apps screen)
+            this.append_breadcrumb_element("/desk", frappe.utils.icon("home"), "pms-home-crumb");
         };
     }
 
     function update_existing_home_crumb() {
-        var target = get_pms_target_route();
-        if (!target) return;
         var homeCrumbA = document.querySelector('.navbar-breadcrumbs li:first-child a, .navbar-breadcrumbs a.pms-home-crumb');
         if (homeCrumbA) {
-            homeCrumbA.setAttribute('href', '/desk/' + target);
+            homeCrumbA.setAttribute('href', '/desk');
         }
     }
 
@@ -158,7 +155,7 @@
             frappe.show_not_found = function (name) {
                 var target = get_pms_target_route();
                 var name_str = (name || '').toString().toLowerCase();
-                if (target && (name_str.indexOf('pms-') !== -1 || name_str === 'workspaces')) {
+                if (target && (name_str.indexOf('pms-') !== -1 || name_str.indexOf('perc-') !== -1 || name_str === 'perc case' || name_str === 'workspaces')) {
                     console.log('[GDL PMS] Intercepted 404 for ' + name + ', redirecting to target dashboard ' + target);
                     if (frappe.ui && frappe.ui.hide_open_dialog) frappe.ui.hide_open_dialog();
                     $('.modal:visible').modal('hide');
@@ -172,33 +169,7 @@
     }
 
     function patch_router() {
-        if (!window.frappe) return;
-
-        if (frappe.set_route && !frappe.set_route._pms_router_patched) {
-            var orig_set_route = frappe.set_route;
-            frappe.set_route = function () {
-                var args = Array.from(arguments);
-                var target = get_pms_target_route();
-                if (target && is_root_desk_route(args)) {
-                    return orig_set_route.call(this, target);
-                }
-                return orig_set_route.apply(this, arguments);
-            };
-            frappe.set_route._pms_router_patched = true;
-        }
-
-        if (frappe.router && frappe.router.set_route && !frappe.router.set_route._pms_router_patched) {
-            var orig_router_set_route = frappe.router.set_route;
-            frappe.router.set_route = function () {
-                var args = Array.from(arguments);
-                var target = get_pms_target_route();
-                if (target && is_root_desk_route(args)) {
-                    return orig_router_set_route.call(this, target);
-                }
-                return orig_router_set_route.apply(this, arguments);
-            };
-            frappe.router.set_route._pms_router_patched = true;
-        }
+        // Allow normal desk navigation without hijacking to PMS
     }
 
     function check_and_redirect_to_dashboard() {
@@ -215,21 +186,8 @@
         var second = (route[1] || '').toLowerCase();
         var pathname = (window.location.pathname || '').replace(/\/+$/, '');
 
-        // Never redirect away if user is viewing or navigating to desktop view / app grid
-        if (first === 'desktop' || pathname === '/desk/desktop' || pathname === '/app/desktop') {
-            return;
-        }
-
-        // 1. If at root /desk, /app, /apps or empty desk route
-        var is_desk_root = is_root_desk_route(route);
-        var is_desk_path = (pathname === '' || pathname === '/desk' || pathname === '/app' || pathname === '/apps');
-
-        if (is_desk_root && is_desk_path) {
-            if (frappe.router && frappe.router.set_route) {
-                frappe.set_route(target);
-            } else {
-                window.location.replace('/desk/' + target);
-            }
+        // Never redirect away if user is viewing or navigating to desktop view / app grid / desk root
+        if (first === 'desktop' || first === 'desk' || pathname === '' || pathname === '/desk' || pathname === '/app' || pathname === '/apps') {
             return;
         }
 
@@ -325,10 +283,11 @@
             e.stopPropagation();
             e.stopImmediatePropagation();
 
+            // Home button navigates to Desk / All Apps view
             if (window.frappe && frappe.set_route) {
-                frappe.set_route(targetRoute);
+                frappe.set_route('desktop');
             } else {
-                window.location.href = '/desk/' + targetRoute;
+                window.location.href = '/desk';
             }
             return false;
         }
@@ -552,9 +511,27 @@
         var route = (frappe.get_route && frappe.get_route()) || [];
         var first = (route[0] || '').toLowerCase();
         var second = (route[1] || '').toLowerCase();
+        var third = (route[2] || '').toLowerCase();
+        var pathname = (window.location.pathname || '').toLowerCase();
 
         var is_pms_dashboard = (first && PMS_DASHBOARD_ROUTES.indexOf(first) !== -1) ||
             ((first === 'desk' || first === 'app' || first === 'workspaces') && PMS_DASHBOARD_ROUTES.indexOf(second) !== -1);
+
+        var is_pms_doctype = (window.cur_frm && cur_frm.doctype && (cur_frm.doctype.indexOf('PMS') !== -1 || cur_frm.doctype.indexOf('PERC') !== -1)) ||
+            (first && (first.indexOf('pms') !== -1 || first.indexOf('perc') !== -1)) ||
+            (second && (second.indexOf('pms') !== -1 || second.indexOf('perc') !== -1)) ||
+            (third && (third.indexOf('pms') !== -1 || third.indexOf('perc') !== -1));
+
+        var is_pms_sidebar = (window.frappe && frappe.app && frappe.app.sidebar && frappe.app.sidebar.sidebar_title &&
+            (frappe.app.sidebar.sidebar_title.toLowerCase().indexOf('pms') !== -1 || frappe.app.sidebar.sidebar_title.toLowerCase().indexOf('perc') !== -1));
+
+        var is_pms = is_pms_dashboard || is_pms_doctype || is_pms_sidebar || (pathname.indexOf('pms') !== -1) || (pathname.indexOf('perc') !== -1);
+
+        if (is_pms) {
+            $('body').addClass('gdl-pms-active');
+        } else {
+            $('body').removeClass('gdl-pms-active');
+        }
 
         if (!is_pms_dashboard) {
             $('body, .layout-main-section, .workspace-page').removeClass('gdl-pms-custom-dashboard-active gdl-pms-employee-dashboard-active gdl-pms-supervisor-dashboard-active gdl-pms-reviewer-dashboard-active gdl-pms-supervisor-2-dashboard-active gdl-pms-hr-dashboard-active');

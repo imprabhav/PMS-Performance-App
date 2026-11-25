@@ -379,3 +379,28 @@ def notify_in_app_plan_approved_pending_agreement(appraisal_doc, employee_user):
 		dedupe=False
 	)
 
+
+def notify_in_app_perc_requested(appraisal_doc, perc_case_name, justification):
+	"""Employee escalates appraisal to PERC -> notify HR Admin / HR Manager users."""
+	emp_name = appraisal_doc.get("employee_name") or appraisal_doc.get("employee")
+	emp_id = appraisal_doc.get("employee")
+	title = f"PERC Review Requested: {emp_name}"
+	subject = f"PERC Escalation Alert: {emp_name} ({emp_id}) - {perc_case_name}"
+	description = (
+		f"{emp_name} ({emp_id}) has requested a formal PERC review for appraisal {appraisal_doc.name} "
+		f"(Case: {perc_case_name}). Justification: '{justification}'. Please schedule a PERC Committee hearing."
+	)
+	notified = 0
+	for hr_user in get_hr_users():
+		send_in_app_notification(
+			for_user=hr_user,
+			title=title,
+			description=description,
+			document_type="PERC Case",
+			document_name=perc_case_name,
+			subject=subject,
+			dedupe=False
+		)
+		notified += 1
+	return notified
+

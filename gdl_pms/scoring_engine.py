@@ -7,21 +7,24 @@ GRADE_WEIGHTS = {
 }
 
 RATING_BANDS = [
-    (90, 100, "Outstanding Performance"),
-    (80, 89.99, "Exceeds Expectations"),
-    (70, 79.99, "Meets Expectations"),
-    (60, 69.99, "Needs Improvement"),
-    (0, 59.99, "Unsatisfactory Performance"),
+    (95, 100, "Outstanding"),
+    (85, 94.99, "Commendable"),
+    (80, 84.99, "Good"),
+    (65, 79.99, "Satisfactory"),
+    (0, 64.99, "Unacceptable"),
 ]
 
 def get_band(total):
     total = flt(total, 2)
-    for lo, hi, label in RATING_BANDS:
-        if lo <= total <= hi:
-            return label
-    if total > 100:
-        return "Outstanding Performance"
-    return "Unrated"
+    if total >= 95:
+        return "Outstanding"
+    if total >= 85:
+        return "Commendable"
+    if total >= 80:
+        return "Good"
+    if total >= 65:
+        return "Satisfactory"
+    return "Unacceptable"
 
 def compute_final_score(appraisal):
     """
@@ -68,11 +71,38 @@ def trigger_pip(employee):
     frappe.logger().info(f"PIP triggered for employee {employee}")
 
 def apply_perc_override(appraisal_name, final_score):
-    """Called from PERC Case when a case is Resolved."""
+    """Called from PERC Case when a case is Resolved: overrides score and permanently locks the appraisal."""
     doc = frappe.get_doc("PMS Appraisal", appraisal_name)
     doc.total_score = flt(final_score, 2)
     doc.rating_band = get_band(doc.total_score)
-    doc.appraisal_status = "Appraisal Accepted"
-    doc.add_comment("Comment", f"PERC Committee determined final score: {doc.total_score} ({doc.rating_band}).")
+    doc.locked = 1
+    doc.workflow_state = "Appraisal Completed"
+    doc.appraisal_status = "Finalized & Locked"
+    doc.add_comment(
+        "Comment",
+        f"PERC Committee determined final score: {doc.total_score} ({doc.rating_band}). Appraisal finalized and locked."
+    )
     doc.save(ignore_permissions=True)
     frappe.db.commit()
+
+    # Auto-sync final rating to Employee Master
+    try:
+        from gdl_pms.gdl_pms.doctype.pms_appraisal.pms_appraisal import (
+            sync_appraisal_to_employee_master,
+            _get_employee_email,
+        )
+        sync_appraisal_to_employee_master(doc)
+        emp_email = _get_employee_email(doc.employee)
+        if emp_email:
+            from gdl_pms.email_service import notify_appraisal_locked
+            notify_appraisal_locked(doc, emp_email, doc.total_score)
+    except Exception as e:
+        frappe.logger().error(f"PERC override post-lock email/sync error for {doc.name}: {str(e)}")
+
+    try:
+        from gdl_pms.notification_service import notify_in_app_appraisal_locked, _get_employee_user_id
+        emp_user = _get_employee_user_id(doc.employee)
+        if emp_user:
+            notify_in_app_appraisal_locked(doc, emp_user, doc.total_score)
+    except Exception as e:
+        frappe.logger().error(f"PERC override in-app notification error for {doc.name}: {str(e)}")

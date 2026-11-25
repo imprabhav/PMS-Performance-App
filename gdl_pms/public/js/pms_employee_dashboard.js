@@ -830,6 +830,9 @@ window.pms_enhance_sidebar_items = function () {
 };
 
 window.pms_enhance_top_left_logo = function () {
+    // Only enhance logo when inside PMS pages/workspaces
+    if (!$('body').hasClass('gdl-pms-active')) return;
+
     // 1. Sidebar Top Left Brand / Logo
     var $headers = $('.sidebar-header, .app-switcher, .workspace-sidebar-header, .app-sidebar-header, .desk-sidebar-header, .body-sidebar, .standard-sidebar-header');
     $headers.each(function () {

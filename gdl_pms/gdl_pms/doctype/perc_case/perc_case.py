@@ -7,8 +7,11 @@ from frappe.utils import flt
 
 class PERCCase(Document):
     def validate(self):
-        if self.status == "Resolved" and (self.final_score is None or self.final_score == ""):
-            frappe.throw("Final Score is mandatory when resolving a PERC Case.")
+        if self.status == "Resolved":
+            if self.final_score is None or self.final_score == "":
+                frappe.throw("Final Score is mandatory when resolving a PERC Case.")
+            if not self.minutes_attachment:
+                frappe.throw("Signed PERC Meeting Minutes / Decision Letter (Minutes Attachment) is mandatory when resolving a PERC Case.")
 
     def on_update(self):
         if self.status == "Resolved" and self.final_score is not None and self.appraisal:

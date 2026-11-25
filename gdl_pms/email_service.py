@@ -545,6 +545,35 @@ def notify_plan_approved_pending_agreement(appraisal_doc, employee_email):
     )
 
 
+def notify_perc_requested(appraisal_doc, perc_case_name, justification, hr_emails):
+    """Triggered when Employee escalates an appraisal to PERC -> notify HR Admins."""
+    emp_name = appraisal_doc.get("employee_name") or appraisal_doc.get("employee")
+    emp_id = appraisal_doc.get("employee")
+    case_url = f"/app/perc-case/{perc_case_name}"
+    details = {
+        "PERC Case ID": perc_case_name,
+        "Appraisal ID": appraisal_doc.name,
+        "Employee": f"{emp_name} ({emp_id})",
+        "Justification": justification,
+        "Action Required": "Schedule PERC Committee hearing and record final decision"
+    }
+    msg = (
+        f"<p><strong>{emp_name} ({emp_id})</strong> has requested a formal PERC Committee review for appraisal "
+        f"<strong>{appraisal_doc.name}</strong>.</p>"
+        f"<p>Please open PERC Case <strong>{perc_case_name}</strong> to review evidence, conduct the committee hearing, "
+        f"and upload the signed decision minutes.</p>"
+    )
+    return send_pms_email(
+        recipients=hr_emails,
+        subject=f"PERC Escalation: {emp_name} ({perc_case_name})",
+        title="PERC Review Requested - Action Required",
+        message=msg,
+        details=details,
+        cta_url=case_url,
+        cta_text="Open PERC Case"
+    )
+
+
 # ==============================================================================
 # 6. INTERNAL UTILITIES
 # ==============================================================================

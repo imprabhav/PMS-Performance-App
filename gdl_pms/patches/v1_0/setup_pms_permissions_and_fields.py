@@ -25,6 +25,18 @@ def execute():
     except Exception as e:
         frappe.logger().warning(f"[GDL PMS Patch] setup_print_formats warning: {e}")
 
+    # 6. Sync PMS Workspace Sidebars
+    try:
+        sync_workspace_sidebars()
+    except Exception as e:
+        frappe.logger().warning(f"[GDL PMS Patch] sync_workspace_sidebars warning: {e}")
+
+    # 7. Sync PMS Desktop Icons & Folder Items (Role-scoped, no Reports)
+    try:
+        sync_pms_desktop_icons()
+    except Exception as e:
+        frappe.logger().warning(f"[GDL PMS Patch] sync_pms_desktop_icons warning: {e}")
+
     frappe.db.commit()
     frappe.logger().info("[GDL PMS Patch] Consolidated setup patch completed successfully.")
 
@@ -219,3 +231,121 @@ def setup_property_setters():
         for f in ["employee", "supervisor_snapshot", "reviewer_snapshot", "supervisor_2_snapshot"]:
             if frappe.db.exists("DocField", {"parent": dt, "fieldname": f}):
                 frappe.db.set_value("DocField", {"parent": dt, "fieldname": f}, "ignore_user_permissions", 1)
+
+def sync_workspace_sidebars():
+    """Ensure all individual PMS Workspace Sidebars match GDL PMS with full tabs and colored icons."""
+    if not frappe.db.exists("Workspace Sidebar", "GDL PMS"):
+        return
+    gdl_pms_ws = frappe.get_doc("Workspace Sidebar", "GDL PMS")
+    for ws_name in ["PMS HR", "PMS Employee", "PMS Supervisor", "PMS Reviewer", "PMS Supervisor 2", "PMS PERC"]:
+        if frappe.db.exists("Workspace Sidebar", ws_name):
+            doc = frappe.get_doc("Workspace Sidebar", ws_name)
+            doc.items = []
+            for it in gdl_pms_ws.items:
+                doc.append("items", {
+                    "label": it.label,
+                    "link_to": it.link_to,
+                    "link_type": it.link_type,
+                    "type": it.type,
+                    "icon": it.icon,
+                    "child": it.child,
+                    "collapsible": it.collapsible,
+                    "indent": it.indent,
+                    "keep_closed": it.keep_closed,
+                    "url": it.url,
+                    "show_arrow": it.show_arrow,
+                    "filters": it.filters,
+                    "route_options": it.route_options,
+                    "navigate_to_tab": it.navigate_to_tab
+                })
+            doc.save(ignore_permissions=True)
+
+def sync_pms_desktop_icons():
+    """Hide duplicate PMS Dashboard icons, scope role dashboards, and add non-report sidebar tabs to GDL PMS folder."""
+    for dup_icon in [
+        "PMS HR Dashboard",
+        "PMS Employee Dashboard",
+        "PMS Supervisor Dashboard",
+        "PMS Supervisor 2 Dashboard",
+        "PMS Reviewer Dashboard",
+    ]:
+        if frappe.db.exists("Desktop Icon", dup_icon):
+            frappe.db.set_value("Desktop Icon", dup_icon, "hidden", 1)
+
+    ws_role_map = {
+        "PMS HR": ["HR Admin", "HR Manager", "System Manager"],
+        "PMS Employee": ["Employee", "Supervisor", "Supervisor 2", "Reviewer"],
+        "PMS Supervisor": ["Supervisor"],
+        "PMS Supervisor 2": ["Supervisor 2"],
+        "PMS Reviewer": ["Reviewer"],
+        "PMS PERC": ["PERC Member", "System Manager"],
+    }
+
+    for icon_name, roles in ws_role_map.items():
+        if frappe.db.exists("Desktop Icon", icon_name):
+            doc = frappe.get_doc("Desktop Icon", icon_name)
+            doc.parent_icon = "GDL PMS"
+            doc.roles = []
+            for r in roles:
+                if frappe.db.exists("Role", r):
+                    doc.append("roles", {"role": r})
+            doc.save(ignore_permissions=True)
+
+    sidebar_tab_icons = [
+        {
+            "label": "PMS Cycle",
+            "link": "/desk/pms-appraisal-cycle",
+            "icon": "calendar",
+            "roles": ["HR Admin", "HR Manager", "System Manager", "Employee", "Supervisor", "Supervisor 2", "Reviewer"],
+        },
+        {
+            "label": "PMS Performance Plan",
+            "link": "/desk/pms-appraisal?plan=1",
+            "icon": "clipboard",
+            "roles": ["HR Admin", "HR Manager", "System Manager", "Employee", "Supervisor", "Supervisor 2", "Reviewer"],
+        },
+        {
+            "label": "PMS Appraisal Form",
+            "link": "/desk/pms-appraisal",
+            "icon": "clipboard-check",
+            "roles": ["HR Admin", "HR Manager", "System Manager", "Employee", "Supervisor", "Supervisor 2", "Reviewer"],
+        },
+        {
+            "label": "PMS Plan Amendment",
+            "link": "/desk/pms-plan-amendment",
+            "icon": "edit-3",
+            "roles": ["HR Admin", "HR Manager", "System Manager", "Employee", "Supervisor", "Supervisor 2", "Reviewer"],
+        },
+        {
+            "label": "PERC Case",
+            "link": "/desk/perc-case",
+            "icon": "shield",
+            "roles": ["HR Admin", "HR Manager", "System Manager", "PERC Member"],
+        },
+        {
+            "label": "Manage Competencies",
+            "link": "/desk/pms-manage-competencies",
+            "icon": "settings",
+            "roles": ["HR Admin", "HR Manager", "System Manager"],
+        },
+    ]
+
+    for item in sidebar_tab_icons:
+        if frappe.db.exists("Desktop Icon", item["label"]):
+            doc = frappe.get_doc("Desktop Icon", item["label"])
+        else:
+            doc = frappe.new_doc("Desktop Icon")
+            doc.label = item["label"]
+
+        doc.icon_type = "Link"
+        doc.link_type = "External"
+        doc.link = item["link"]
+        doc.parent_icon = "GDL PMS"
+        doc.app = "gdl_pms"
+        doc.icon = item["icon"]
+        doc.hidden = 0
+        doc.roles = []
+        for r in item["roles"]:
+            if frappe.db.exists("Role", r):
+                doc.append("roles", {"role": r})
+        doc.save(ignore_permissions=True)

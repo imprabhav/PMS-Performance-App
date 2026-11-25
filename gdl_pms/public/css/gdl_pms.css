@@ -1,16 +1,17 @@
 /* ==========================================================================
    GDL PMS - Modern Glassmorphism Login Page & Web Beautification
+   (Scoped so default Frappe / ERPNext login page is never disturbed)
    ========================================================================== */
 
-/* --- LOGIN PAGE CONTAINER BACKGROUND --- */
-body[data-route="login"],
-.page-card,
-body.frappe-card-page {
+/* --- LOGIN PAGE CONTAINER BACKGROUND (SCOPED) --- */
+body.gdl-pms-custom-login[data-route="login"],
+body.gdl-pms-custom-login .page-card,
+body.gdl-pms-custom-login.frappe-card-page {
     background-color: #04120c !important;
 }
 
-body[data-route="login"]::before,
-.for-login::before {
+body.gdl-pms-custom-login[data-route="login"]::before,
+body.gdl-pms-custom-login .for-login::before {
     content: "";
     position: fixed;
     top: 0;
@@ -42,8 +43,8 @@ body[data-route="login"]::before,
     }
 }
 
-/* --- GLASSMORPHIC LOGIN CARD --- */
-.page-card {
+/* --- GLASSMORPHIC LOGIN CARD (SCOPED) --- */
+body.gdl-pms-custom-login .page-card {
     position: relative !important;
     z-index: 10 !important;
     max-width: 440px !important;
@@ -73,7 +74,7 @@ body[data-route="login"]::before,
 }
 
 /* --- LOGO BEAUTIFICATION --- */
-.page-card-head .app-logo {
+body.gdl-pms-custom-login .page-card-head .app-logo {
     max-height: 110px !important;
     max-width: 85% !important;
     width: auto !important;
@@ -83,25 +84,25 @@ body[data-route="login"]::before,
     transition: transform 0.3s ease !important;
 }
 
-.page-card-head .app-logo:hover {
+body.gdl-pms-custom-login .page-card-head .app-logo:hover {
     transform: scale(1.03) !important;
 }
 
 /* --- LOGIN FORM LABELS & HEADINGS --- */
-.page-card-head {
+body.gdl-pms-custom-login .page-card-head {
     text-align: center !important;
     margin-bottom: 24px !important;
 }
 
-.page-card .page-card-head h4,
-.page-card .page-card-head .title {
+body.gdl-pms-custom-login .page-card .page-card-head h4,
+body.gdl-pms-custom-login .page-card .page-card-head .title {
     font-weight: 700 !important;
     color: #0f172a !important;
     font-size: 22px !important;
     letter-spacing: -0.5px !important;
 }
 
-.page-card label {
+body.gdl-pms-custom-login .page-card label {
     font-weight: 600 !important;
     font-size: 13px !important;
     color: #334155 !important;
@@ -109,12 +110,12 @@ body[data-route="login"]::before,
 }
 
 /* --- LOGIN INPUT FIELDS & ICONS FIX --- */
-.email-field,
-.password-field {
+body.gdl-pms-custom-login .email-field,
+body.gdl-pms-custom-login .password-field {
     position: relative !important;
 }
 
-.page-card .form-control {
+body.gdl-pms-custom-login .page-card .form-control {
     background-color: #f8fafc !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 10px !important;
@@ -125,12 +126,12 @@ body[data-route="login"]::before,
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.password-field .form-control {
+body.gdl-pms-custom-login .password-field .form-control {
     padding-right: 42px !important;
 }
 
-.email-field .field-icon,
-.password-field .field-icon {
+body.gdl-pms-custom-login .email-field .field-icon,
+body.gdl-pms-custom-login .password-field .field-icon {
     position: absolute !important;
     left: 14px !important;
     top: 50% !important;
@@ -141,7 +142,7 @@ body[data-route="login"]::before,
     stroke: #64748b !important;
 }
 
-.password-field .toggle-password {
+body.gdl-pms-custom-login .password-field .toggle-password {
     position: absolute !important;
     right: 14px !important;
     top: 50% !important;
@@ -153,12 +154,12 @@ body[data-route="login"]::before,
     transition: color 0.2s ease !important;
 }
 
-.password-field .toggle-password:hover {
+body.gdl-pms-custom-login .password-field .toggle-password:hover {
     color: #15803d !important;
     stroke: #15803d !important;
 }
 
-.page-card .form-control:focus {
+body.gdl-pms-custom-login .page-card .form-control:focus {
     background-color: #ffffff !important;
     border-color: #15803d !important;
     box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.18) !important;
@@ -166,8 +167,8 @@ body[data-route="login"]::before,
 }
 
 /* --- LOGIN BUTTON --- */
-.page-card .btn-login,
-.page-card .btn-primary {
+body.gdl-pms-custom-login .page-card .btn-login,
+body.gdl-pms-custom-login .page-card .btn-primary {
     background: linear-gradient(135deg, #15803d 0%, #0d9488 100%) !important;
     border: none !important;
     border-radius: 10px !important;
@@ -181,20 +182,20 @@ body[data-route="login"]::before,
     margin-top: 10px !important;
 }
 
-.page-card .btn-login:hover,
-.page-card .btn-primary:hover {
+body.gdl-pms-custom-login .page-card .btn-login:hover,
+body.gdl-pms-custom-login .page-card .btn-primary:hover {
     background: linear-gradient(135deg, #166534 0%, #0f766e 100%) !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 8px 20px rgba(21, 128, 61, 0.45) !important;
 }
 
-.page-card .btn-login:active,
-.page-card .btn-primary:active {
+body.gdl-pms-custom-login .page-card .btn-login:active,
+body.gdl-pms-custom-login .page-card .btn-primary:active {
     transform: translateY(0) scale(0.99) !important;
 }
 
 /* Navbar logo override */
-.navbar-brand img.app-logo {
+body.gdl-pms-active .navbar-brand img.app-logo {
     max-height: 32px !important;
 }
 

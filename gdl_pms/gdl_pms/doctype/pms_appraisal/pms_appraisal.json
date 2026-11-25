@@ -251,13 +251,15 @@
    "fieldname": "plan_rejection_remark",
    "fieldtype": "Small Text",
    "hidden": 1,
-   "label": "Plan Return Remark"
+   "label": "Plan Return Remark",
+   "read_only": 1
   },
   {
    "fieldname": "plan_revision_remark",
    "fieldtype": "Small Text",
    "label": "Supervisor / Reviewer Revision Remark",
-   "hidden": 1
+   "hidden": 1,
+   "read_only": 1
   },
   {
    "fieldname": "plan_revision_changes",

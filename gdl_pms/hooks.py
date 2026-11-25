@@ -39,34 +39,24 @@ app_include_js = [
 ]
 
 # include js, css files in header of web template
-web_include_css = [
-	"/assets/gdl_pms/css/gdl_pms_theme.bundle.css",
-	"/assets/gdl_pms/css/gdl_pms.css"
-]
+# web_include_css = [
+# 	"/assets/gdl_pms/css/gdl_pms_theme.bundle.css",
+# 	"/assets/gdl_pms/css/gdl_pms.css"
+# ]
 
 # Home Pages
 # ----------
 
 # application home page (will override Website Settings)
-home_page = "login"
+# home_page = "login"
 
 # website user home page (by Role)
-role_home_page = {
-	"HR Admin": "desk/pms-hr",
-	"Reviewer": "desk/pms-reviewer",
-	"Supervisor 2": "desk/pms-supervisor-2",
-	"Supervisor": "desk/pms-supervisor",
-	"Employee": "desk/pms-employee"
-}
+# role_home_page = {
+# 	"HR Admin": "desk/pms-hr"
+# }
 
 on_session_creation = "gdl_pms.auth_hooks.on_session_creation"
 boot_session = "gdl_pms.auth_hooks.boot_session"
-
-doc_events = {
-	"User": {
-		"validate": "gdl_pms.auth_hooks.set_user_default_workspace"
-	}
-}
 
 
 # Generators

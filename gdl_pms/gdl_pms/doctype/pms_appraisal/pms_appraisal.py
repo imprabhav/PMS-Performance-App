@@ -724,6 +724,20 @@ def request_perc_review(docname, justification):
     doc.add_comment("Comment", f"PERC Review requested by employee {doc.employee_name}. Case {doc.perc_case} opened. Justification: \"{justification}\".")
     doc.save(ignore_permissions=True)
     frappe.db.commit()
+
+    try:
+        from gdl_pms.notification_service import notify_in_app_perc_requested, get_hr_users
+        notify_in_app_perc_requested(doc, doc.perc_case, justification)
+        hr_emails = [
+            frappe.db.get_value("User", u, "email") or u
+            for u in get_hr_users()
+        ]
+        if hr_emails:
+            from gdl_pms.email_service import notify_perc_requested
+            notify_perc_requested(doc, doc.perc_case, justification, hr_emails)
+    except Exception as e:
+        frappe.logger().error(f"Failed sending PERC request notifications: {str(e)}")
+
     return doc.perc_case
 
 

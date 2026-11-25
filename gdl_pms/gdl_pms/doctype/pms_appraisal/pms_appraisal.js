@@ -348,11 +348,11 @@ function get_table_scores(frm) {
 	let total_score = flt(active_target_score + active_comp_score, 2);
 
 	let band = "Unrated";
-	if (total_score >= 90) band = "Outstanding Performance";
-	else if (total_score >= 80) band = "Exceeds Expectations";
-	else if (total_score >= 70) band = "Meets Expectations";
-	else if (total_score >= 60) band = "Needs Improvement";
-	else if (total_score > 0 || app_status !== "Self-Assessment Pending") band = "Unsatisfactory Performance";
+	if (total_score >= 95) band = "Outstanding";
+	else if (total_score >= 85) band = "Commendable";
+	else if (total_score >= 80) band = "Good";
+	else if (total_score >= 65) band = "Satisfactory";
+	else if (total_score > 0 || app_status !== "Self-Assessment Pending") band = "Unacceptable";
 
 	return {
 		show_super: show_super,
@@ -1119,6 +1119,18 @@ function apply_scoring_permissions(frm, app_status, is_supervisor, is_reviewer, 
 			}
 		} catch(e) {}
 	});
+
+	if (!can_edit_self && tg && tg.wrapper) {
+		setTimeout(function() {
+			tg.wrapper.find('[data-fieldname="evidence"] [data-action="clear_attachment"], [data-fieldname="evidence"] .btn-attach').hide();
+			tg.wrapper.find('[data-fieldname="evidence"] .attached-file-link').each(function() {
+				let href = $(this).attr('href') || '';
+				if (href) {
+					$(this).attr('title', href).text('View Doc');
+				}
+			});
+		}, 50);
+	}
 
 	if (cg) {
 		Object.keys(comp_ro).forEach(fn => {
@@ -2142,6 +2154,7 @@ frappe.ui.form.on("PMS Appraisal", {
 		try {
 			let is_ret_status = (frm.doc.plan_status === "Rejected" || frm.doc.plan_status === "Returned" || frm.doc.plan_status === "Returned by Supervisor" || frm.doc.plan_status === "Returned by Reviewer");
 			frm.set_df_property("plan_rejection_remark", "hidden", is_ret_status ? 0 : 1);
+			frm.set_df_property("plan_rejection_remark", "read_only", 1);
 			frm.set_df_property("plan_revision_remark", "hidden", 1);
 		} catch(e) { console.log(e); }
 
@@ -3081,6 +3094,9 @@ frappe.ui.form.on("PMS Target", {
 			grid_row.toggle_enable("self_score", can_edit_self);
 			grid_row.toggle_enable("self_remark", can_edit_self);
 			grid_row.toggle_enable("evidence", can_edit_self);
+			if (!can_edit_self && grid_row.wrapper) {
+				grid_row.wrapper.find('[data-fieldname="evidence"] [data-action="clear_attachment"], [data-fieldname="evidence"] .btn-attach').hide();
+			}
 
 			// Supervisor scoring
 			let show_super = (!is_self_stage);
