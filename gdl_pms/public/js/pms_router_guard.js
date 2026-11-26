@@ -155,7 +155,7 @@
             frappe.show_not_found = function (name) {
                 var target = get_pms_target_route();
                 var name_str = (name || '').toString().toLowerCase();
-                if (target && (name_str.indexOf('pms-') !== -1 || name_str.indexOf('perc-') !== -1 || name_str === 'perc case' || name_str === 'workspaces')) {
+                if (target && (name_str.indexOf('pms-') !== -1 || name_str.indexOf('perc-') !== -1 || name_str === 'perc case')) {
                     console.log('[GDL PMS] Intercepted 404 for ' + name + ', redirecting to target dashboard ' + target);
                     if (frappe.ui && frappe.ui.hide_open_dialog) frappe.ui.hide_open_dialog();
                     $('.modal:visible').modal('hide');
