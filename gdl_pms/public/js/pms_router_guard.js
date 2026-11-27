@@ -173,18 +173,31 @@
     }
 
     function check_and_redirect_to_dashboard() {
+        var route = (frappe.get_route && frappe.get_route()) || [];
+        var first = (route[0] || '').toLowerCase();
+        var second = (route[1] || '').toLowerCase();
+        var pathname = (window.location.pathname || '').replace(/\/+$/, '');
         var target = get_pms_target_route();
+
+        // Handle bare /desk/gdl-pms or /app/gdl-pms route for all users including Administrator
+        if (pathname === '/desk/gdl-pms' || pathname === '/app/gdl-pms' ||
+            (first === 'gdl-pms' && !second) ||
+            ((first === 'desk' || first === 'app') && second === 'gdl-pms' && !route[2])) {
+            var dest = target || 'pms-hr';
+            if (frappe.router && frappe.router.set_route) {
+                frappe.set_route(dest);
+            } else {
+                window.location.replace('/desk/' + dest);
+            }
+            return;
+        }
+
         if (!target) return;
 
         patch_breadcrumbs();
         patch_router();
         patch_not_found();
         update_existing_home_crumb();
-
-        var route = (frappe.get_route && frappe.get_route()) || [];
-        var first = (route[0] || '').toLowerCase();
-        var second = (route[1] || '').toLowerCase();
-        var pathname = (window.location.pathname || '').replace(/\/+$/, '');
 
         // Never redirect away if user is viewing or navigating to desktop view / app grid / desk root
         if (first === 'desktop' || first === 'desk' || pathname === '' || pathname === '/desk' || pathname === '/app' || pathname === '/apps') {

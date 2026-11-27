@@ -16,7 +16,7 @@ add_to_apps_screen = [
 		"name": "gdl_pms",
 		"logo": "/assets/gdl_pms/logo_gdl.png",
 		"title": "GDL PMS",
-		"route": "/app/gdl-pms",
+		"route": "/desk/pms-hr",
 	}
 ]
 app_logo_url = "/assets/gdl_pms/logo_gdl.png"
