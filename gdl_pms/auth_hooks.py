@@ -78,6 +78,17 @@ def boot_session(bootinfo):
             _sync_gdl_pms_module_sidebar(bootinfo["module_sidebars"]["GDL PMS"])
 
         # Hide duplicate standalone PMS * Dashboard icons on Desktop so only GDL PMS folder appears
+        # and point GDL PMS Desktop Icon / app_data directly to the user's role dashboard
+        user_pms = get_user_pms_info()
+        user_pms_route = "/" + user_pms["route"] if user_pms else "/desk/pms-hr"
+        if "HR Manager" in set(frappe.get_roles(frappe.session.user)):
+            user_pms_route = "/desk/pms-hr"
+
+        if "app_data" in bootinfo and isinstance(bootinfo["app_data"], list):
+            for app_entry in bootinfo["app_data"]:
+                if isinstance(app_entry, dict) and app_entry.get("app_name") == "gdl_pms":
+                    app_entry["app_route"] = user_pms_route
+
         if "desktop_icons" in bootinfo and isinstance(bootinfo["desktop_icons"], list):
             duplicate_pms_icons = {
                 "PMS HR Dashboard",
@@ -86,10 +97,14 @@ def boot_session(bootinfo):
                 "PMS Supervisor 2 Dashboard",
                 "PMS Reviewer Dashboard",
             }
-            bootinfo["desktop_icons"] = [
-                d for d in bootinfo["desktop_icons"]
-                if d.get("name") not in duplicate_pms_icons and d.get("label") not in duplicate_pms_icons
-            ]
+            filtered_icons = []
+            for d in bootinfo["desktop_icons"]:
+                if d.get("name") in duplicate_pms_icons or d.get("label") in duplicate_pms_icons:
+                    continue
+                if d.get("name") == "GDL PMS" or d.get("label") == "GDL PMS":
+                    d["link"] = user_pms_route
+                filtered_icons.append(d)
+            bootinfo["desktop_icons"] = filtered_icons
     except Exception as e:
         frappe.log_error(f"Error in GDL PMS boot_session: {str(e)}")
 

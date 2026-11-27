@@ -155,11 +155,12 @@
             frappe.show_not_found = function (name) {
                 var target = get_pms_target_route();
                 var name_str = (name || '').toString().toLowerCase();
-                if (target && (name_str.indexOf('pms-') !== -1 || name_str.indexOf('perc-') !== -1 || name_str === 'perc case')) {
-                    console.log('[GDL PMS] Intercepted 404 for ' + name + ', redirecting to target dashboard ' + target);
+                if (name_str === 'gdl-pms' || (target && (name_str.indexOf('pms-') !== -1 || name_str.indexOf('perc-') !== -1 || name_str === 'perc case'))) {
+                    var dest = target || 'pms-hr';
+                    console.log('[GDL PMS] Intercepted 404 for ' + name + ', redirecting to target dashboard ' + dest);
                     if (frappe.ui && frappe.ui.hide_open_dialog) frappe.ui.hide_open_dialog();
                     $('.modal:visible').modal('hide');
-                    frappe.set_route(target);
+                    frappe.set_route(dest);
                     return;
                 }
                 return orig_show_not_found.apply(this, arguments);
