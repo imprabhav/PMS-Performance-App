@@ -355,7 +355,7 @@ def _get_applicable_employees_internal(grade_group=None, cycle_name=None, cycle_
 	else:
 		employees = [
 			e for e in employees
-			if (e.get("employment_type") in ["Full time employee", "Contract", "Regular"]) or (not e.get("employment_type") and (e.get("final_confirmation_date") or e.get("contract_end_date")))
+			if (e.get("employment_type") in ["Full-time", "Full time employee", "Contract", "Regular"]) or (not e.get("employment_type") and (e.get("final_confirmation_date") or e.get("contract_end_date")))
 		]
 
 	# Collect supervisor and reviewer IDs to fetch their names in batch
