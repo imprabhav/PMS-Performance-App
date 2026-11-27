@@ -88,7 +88,7 @@ def setup_custom_fields():
         "fieldtype": "Link",
         "options": "Employee",
         "insert_after": "reports_to",
-        "in_list_view": 1
+        "in_list_view": 0
     })
 
     # Employee.supervisor_2
@@ -98,8 +98,14 @@ def setup_custom_fields():
         "fieldtype": "Link",
         "options": "Employee",
         "insert_after": "reviewer",
-        "in_list_view": 1
+        "in_list_view": 0
     })
+
+    # Ensure existing Custom Fields do not trigger duplicate tabEmployee2 join in List View
+    for fn in ["reviewer", "supervisor_2"]:
+        cf = frappe.db.get_value("Custom Field", {"dt": "Employee", "fieldname": fn})
+        if cf:
+            frappe.db.set_value("Custom Field", cf, "in_list_view", 0)
 
     # Employee.pms_evaluations_tab
     create_custom_field("Employee", {
