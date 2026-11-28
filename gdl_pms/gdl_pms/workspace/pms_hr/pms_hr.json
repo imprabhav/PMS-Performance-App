@@ -75,7 +75,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-09-27 02:51:32.032309",
+ "modified": "2026-11-28 17:33:53.201225",
  "modified_by": "Administrator",
  "module": "GDL PMS",
  "name": "PMS HR",
@@ -139,22 +139,9 @@
    "type": "Report"
   },
   {
-   "doc_view": "",
-   "label": "PMS Office Report",
-   "link_to": "PMS Office Report",
-   "report_ref_doctype": "PMS Appraisal",
-   "type": "Report"
-  },
-  {
    "doc_view": "List",
    "label": "Plan Amendments",
    "link_to": "PMS Plan Amendment",
-   "type": "DocType"
-  },
-  {
-   "doc_view": "List",
-   "label": "Grade Groups",
-   "link_to": "PMS Grade Group",
    "type": "DocType"
   },
   {

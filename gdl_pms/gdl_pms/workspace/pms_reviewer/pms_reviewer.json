@@ -14,7 +14,7 @@
  "label": "PMS Reviewer",
  "link_type": "DocType",
  "links": [],
- "modified": "2026-10-01 02:19:23.625934",
+ "modified": "2026-11-28 17:33:53.272463",
  "modified_by": "Administrator",
  "module": "GDL PMS",
  "name": "PMS Reviewer",
@@ -34,13 +34,6 @@
    "label": "Reviewer Plan Approvals",
    "link_to": "PMS Appraisal",
    "stats_filter": "[[\"PMS Appraisal\",\"plan_status\",\"=\",\"Pending Reviewer Approval\"]]",
-   "type": "DocType"
-  },
-  {
-   "doc_view": "List",
-   "label": "Appraisals For Review",
-   "link_to": "PMS Appraisal",
-   "stats_filter": "[[\"PMS Appraisal\",\"appraisal_status\",\"in\",[\"Pending Reviewer Review\",\"Disputed - Pending Reviewer\"]]]",
    "type": "DocType"
   },
   {

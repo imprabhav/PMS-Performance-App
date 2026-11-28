@@ -1,7 +1,7 @@
 (function () {
     if (typeof window === 'undefined' || !window.frappe) return;
 
-    var PMS_DASHBOARD_ROUTES = ['pms-hr', 'pms-reviewer', 'pms-supervisor-2', 'pms-supervisor', 'pms-employee'];
+    var PMS_DASHBOARD_ROUTES = ['pms-hr', 'pms-reviewer', 'pms-supervisor-2', 'pms-supervisor', 'pms-perc', 'pms-employee'];
 
     function get_pms_target_route() {
         if (!window.frappe || !frappe.session || !frappe.session.user || frappe.session.user === 'Guest') {
@@ -30,7 +30,12 @@
             return 'pms-supervisor';
         }
 
-        // 5. PMS Employee -> Employee Dashboard
+        // 5. PMS PERC -> PERC Dashboard
+        if (roles.indexOf('PMS PERC') !== -1) {
+            return 'pms-perc';
+        }
+
+        // 6. PMS Employee -> Employee Dashboard
         if (roles.indexOf('PMS Employee') !== -1) {
             return 'pms-employee';
         }
@@ -67,6 +72,9 @@
         }
         if (roles.indexOf('PMS Supervisor') !== -1) {
             allowed.push('pms-supervisor');
+        }
+        if (roles.indexOf('PMS PERC') !== -1) {
+            allowed.push('pms-perc');
         }
         if (roles.indexOf('PMS Employee') !== -1) {
             allowed.push('pms-employee');
@@ -184,13 +192,19 @@
     }
 
     function check_and_redirect_to_dashboard() {
+        if (!window.frappe || !frappe.session || !frappe.session.user || frappe.session.user === 'Guest') {
+            return;
+        }
+        var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) || frappe.user_roles || [];
+        if (!roles || !roles.length) {
+            return;
+        }
         var route = (frappe.get_route && frappe.get_route()) || [];
         var first = (route[0] || '').toLowerCase();
         var second = (route[1] || '').toLowerCase();
         var pathname = (window.location.pathname || '').replace(/\/+$/, '');
         var target = get_pms_target_route();
-        var roles = frappe.user_roles || (frappe.boot && frappe.boot.user && frappe.boot.user.roles) || [];
-        var is_administrator = (frappe.session && frappe.session.user === 'Administrator') || roles.indexOf('Administrator') !== -1;
+        var is_administrator = (frappe.session.user === 'Administrator') || roles.indexOf('Administrator') !== -1;
 
         var is_pms_route = (pathname.indexOf('/gdl-pms') !== -1 || pathname.indexOf('/pms-') !== -1 ||
             first === 'gdl-pms' || second === 'gdl-pms' ||

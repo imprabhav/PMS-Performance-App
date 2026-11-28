@@ -14,7 +14,7 @@
  "label": "PMS Employee",
  "link_type": "DocType",
  "links": [],
- "modified": "2026-10-07 00:17:21.722616",
+ "modified": "2026-11-28 17:33:53.253303",
  "modified_by": "Administrator",
  "module": "GDL PMS",
  "name": "PMS Employee",
@@ -25,15 +25,6 @@
  "roles": [
   {
    "role": "PMS Employee"
-  },
-  {
-   "role": "PMS Supervisor"
-  },
-  {
-   "role": "PMS Supervisor 2"
-  },
-  {
-   "role": "PMS Reviewer"
   }
  ],
  "sequence_id": 0.0,
