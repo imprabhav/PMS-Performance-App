@@ -85,26 +85,43 @@
         return allowed;
     }
 
+    function remove_sidebar_item(name, link_to) {
+        var selectors = [
+            '.sidebar-item-container[data-public-name="' + name + '"]',
+            '.sidebar-item-container[item-name="' + name + '"]',
+            '.sidebar-item-container[title="' + name + '"]'
+        ];
+        if (link_to) {
+            selectors.push('.sidebar-item-container[data-link-to="' + link_to + '"]');
+        }
+        $(selectors.join(', ')).remove();
+    }
+
     function hide_pms_employee_for_hr() {
         var roles = frappe.user_roles || (frappe.boot && frappe.boot.user && frappe.boot.user.roles) || [];
         var is_administrator = (frappe.session && frappe.session.user === 'Administrator') || roles.indexOf('Administrator') !== -1;
         var is_admin = is_administrator || roles.indexOf('System Manager') !== -1;
         var is_hr = (roles.indexOf('HR Admin') !== -1 || roles.indexOf('HR Manager') !== -1 || roles.indexOf('PMS HR') !== -1);
         if ((is_hr || is_admin) && !is_administrator) {
-            $('.sidebar-item-container[data-public-name="PMS Employee"], ' +
-              '.sidebar-item-container[data-link-to="PMS Employee"], ' +
-              '.sidebar-item-container[item-name="PMS Employee"], ' +
-              '.sidebar-item-container[title="PMS Employee"]').remove();
+            remove_sidebar_item('PMS Employee', 'PMS Employee');
+        }
+        if (is_admin && !is_administrator) {
+            if (roles.indexOf('Supervisor') === -1 && roles.indexOf('PMS Supervisor') === -1) {
+                remove_sidebar_item('PMS Supervisor', 'PMS Supervisor');
+            }
+            if (roles.indexOf('Reviewer') === -1 && roles.indexOf('PMS Reviewer') === -1) {
+                remove_sidebar_item('PMS Reviewer', 'PMS Reviewer');
+            }
+            if (roles.indexOf('Supervisor 2') === -1 && roles.indexOf('PMS Supervisor 2') === -1) {
+                remove_sidebar_item('PMS Supervisor 2', 'PMS Supervisor 2');
+            }
+            if (roles.indexOf('PMS PERC') === -1) {
+                remove_sidebar_item('PMS PERC', 'PMS PERC');
+            }
         }
         if (!is_hr && !is_admin) {
-            $('.sidebar-item-container[data-public-name="Grade Groups"], ' +
-              '.sidebar-item-container[data-link-to="PMS Grade Group"], ' +
-              '.sidebar-item-container[item-name="Grade Groups"], ' +
-              '.sidebar-item-container[title="Grade Groups"], ' +
-              '.sidebar-item-container[data-public-name="Manage Competencies"], ' +
-              '.sidebar-item-container[data-link-to="PMS Manage Competencies"], ' +
-              '.sidebar-item-container[item-name="Manage Competencies"], ' +
-              '.sidebar-item-container[title="Manage Competencies"]').remove();
+            remove_sidebar_item('Grade Groups', 'PMS Grade Group');
+            remove_sidebar_item('Manage Competencies', 'PMS Manage Competencies');
         }
     }
 
