@@ -36,6 +36,12 @@ gdl_pms.hr_dashboard = {
     },
 
     is_hr_workspace: function () {
+        var roles = frappe.user_roles || (frappe.boot && frappe.boot.user && frappe.boot.user.roles) || [];
+        var is_allowed = (frappe.session && frappe.session.user === 'Administrator') ||
+            roles.indexOf('PMS HR Admin') !== -1 ||
+            roles.indexOf('Administrator') !== -1;
+        if (!is_allowed) return false;
+
         var route = frappe.get_route() || [];
         if (!route.length) return false;
         var first = (route[0] || '').toLowerCase();

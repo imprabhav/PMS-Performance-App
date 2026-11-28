@@ -189,8 +189,26 @@
         var second = (route[1] || '').toLowerCase();
         var pathname = (window.location.pathname || '').replace(/\/+$/, '');
         var target = get_pms_target_route();
+        var roles = frappe.user_roles || (frappe.boot && frappe.boot.user && frappe.boot.user.roles) || [];
+        var is_administrator = (frappe.session && frappe.session.user === 'Administrator') || roles.indexOf('Administrator') !== -1;
 
-        // Handle bare /desk/gdl-pms or /app/gdl-pms route for all users including Administrator
+        var is_pms_route = (pathname.indexOf('/gdl-pms') !== -1 || pathname.indexOf('/pms-') !== -1 ||
+            first === 'gdl-pms' || second === 'gdl-pms' ||
+            PMS_DASHBOARD_ROUTES.indexOf(first) !== -1 || PMS_DASHBOARD_ROUTES.indexOf(second) !== -1);
+
+        // Users without any PMS role must never be routed into PMS dashboards
+        if (!target && !is_administrator) {
+            if (is_pms_route) {
+                if (frappe.router && frappe.router.set_route) {
+                    frappe.set_route('desk');
+                } else {
+                    window.location.replace('/desk');
+                }
+            }
+            return;
+        }
+
+        // Handle bare /desk/gdl-pms or /app/gdl-pms route for authorized PMS users and Administrator
         if (pathname === '/desk/gdl-pms' || pathname === '/app/gdl-pms' ||
             (first === 'gdl-pms' && !second) ||
             ((first === 'desk' || first === 'app') && second === 'gdl-pms' && !route[2])) {
