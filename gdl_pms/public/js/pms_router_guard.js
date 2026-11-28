@@ -87,9 +87,10 @@
 
     function hide_pms_employee_for_hr() {
         var roles = frappe.user_roles || (frappe.boot && frappe.boot.user && frappe.boot.user.roles) || [];
-        var is_admin = roles.indexOf('Administrator') !== -1 || roles.indexOf('System Manager') !== -1;
+        var is_administrator = (frappe.session && frappe.session.user === 'Administrator') || roles.indexOf('Administrator') !== -1;
+        var is_admin = is_administrator || roles.indexOf('System Manager') !== -1;
         var is_hr = (roles.indexOf('HR Admin') !== -1 || roles.indexOf('HR Manager') !== -1 || roles.indexOf('PMS HR') !== -1);
-        if (is_hr && !is_admin) {
+        if ((is_hr || is_admin) && !is_administrator) {
             $('.sidebar-item-container[data-public-name="PMS Employee"], ' +
               '.sidebar-item-container[data-link-to="PMS Employee"], ' +
               '.sidebar-item-container[item-name="PMS Employee"], ' +

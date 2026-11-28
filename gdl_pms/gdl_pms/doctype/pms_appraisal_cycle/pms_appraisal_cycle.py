@@ -657,11 +657,11 @@ def has_permission(doc, ptype="read", user=None):
 	if user == "Administrator": return True
 	
 	roles = frappe.get_roles(user)
-	if "HR Admin" in roles or "System Manager" in roles:
+	if "HR Admin" in roles:
 		return True
 		
 	if ptype == "read":
-		allowed_roles = {"Employee", "Supervisor", "Reviewer", "Supervisor 2"}
+		allowed_roles = {"System Manager", "Employee", "Supervisor", "Reviewer", "Supervisor 2"}
 		if any(r in allowed_roles for r in roles):
 			return True
 	

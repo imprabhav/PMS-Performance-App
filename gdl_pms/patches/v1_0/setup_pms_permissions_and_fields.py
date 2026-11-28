@@ -132,98 +132,92 @@ def setup_custom_fields():
         "insert_after": "pms_evaluations_section"
     })
 
-def setup_permissions():
-    # Grant Page read permissions to PMS roles
-    page_roles = ["Desk User", "Employee", "Supervisor", "Supervisor 2", "Reviewer", "HR Admin", "All"]
-    for role in page_roles:
-        if not frappe.db.exists("Role", role):
-            continue
-        exists = frappe.db.exists("Custom DocPerm", {"parent": "Page", "role": role})
-        if not exists:
-            frappe.get_doc({
-                "doctype": "Custom DocPerm",
-                "parent": "Page",
-                "parenttype": "DocType",
-                "parentfield": "permissions",
-                "role": role,
-                "read": 1,
-                "select": 1,
-                "write": 0,
-                "create": 0,
-                "delete": 0,
-                "report": 0,
-                "export": 0,
-                "share": 0
-            }).insert(ignore_permissions=True)
-        else:
-            doc = frappe.get_doc("Custom DocPerm", exists)
-            doc.read = 1
-            doc.select = 1
+def _upsert_custom_docperm(doctype, role, perms):
+    """Ensure a Custom DocPerm row exists with the given permission flags."""
+    if not frappe.db.exists("Role", role) or not frappe.db.exists("DocType", doctype):
+        return
+    name = frappe.db.exists("Custom DocPerm", {"parent": doctype, "role": role, "permlevel": 0})
+    if not name:
+        doc = frappe.get_doc({
+            "doctype": "Custom DocPerm",
+            "parent": doctype,
+            "parenttype": "DocType",
+            "parentfield": "permissions",
+            "role": role,
+            "permlevel": 0,
+            **perms,
+        })
+        doc.insert(ignore_permissions=True)
+    else:
+        doc = frappe.get_doc("Custom DocPerm", name)
+        changed = False
+        for k, v in perms.items():
+            if doc.get(k) != v:
+                doc.set(k, v)
+                changed = True
+        if changed:
             doc.save(ignore_permissions=True)
 
+
+def setup_permissions():
+    # Grant Page read permissions to PMS roles
+    page_roles = ["Desk User", "Employee", "Supervisor", "Supervisor 2", "Reviewer", "HR Admin", "System Manager", "All"]
+    for role in page_roles:
+        _upsert_custom_docperm("Page", role, {
+            "read": 1, "select": 1, "write": 0, "create": 0,
+            "delete": 0, "report": 0, "export": 0, "share": 0,
+        })
+
     # Grant HR Admin read permissions to standard DocTypes
-    hr_read_doctypes = ["Employee", "Department", "Designation"]
-    for dt in hr_read_doctypes:
-        exists = frappe.db.exists("Custom DocPerm", {"parent": dt, "role": "HR Admin"})
-        if not exists:
-            frappe.get_doc({
-                "doctype": "Custom DocPerm",
-                "parent": dt,
-                "parenttype": "DocType",
-                "parentfield": "permissions",
-                "role": "HR Admin",
-                "read": 1
-            }).insert(ignore_permissions=True)
-        else:
-            perm = frappe.get_doc("Custom DocPerm", exists)
-            perm.read = 1
-            perm.save(ignore_permissions=True)
+    for dt in ["Employee", "Department", "Designation"]:
+        _upsert_custom_docperm(dt, "HR Admin", {"read": 1})
 
-    # Grant Employee role read access to linked doctypes
-    emp_read_doctypes = ["Employee", "PMS Appraisal Cycle"]
-    for dt in emp_read_doctypes:
-        exists = frappe.db.exists("Custom DocPerm", {"parent": dt, "role": "Employee"})
-        if not exists:
-            frappe.get_doc({
-                "doctype": "Custom DocPerm",
-                "parent": dt,
-                "parenttype": "DocType",
-                "parentfield": "permissions",
-                "role": "Employee",
-                "read": 1
-            }).insert(ignore_permissions=True)
+    # Grant Employee role read access to Employee
+    _upsert_custom_docperm("Employee", "Employee", {"read": 1})
 
-    # Employee permissions for Appraisal DocTypes
-    emp_crud_doctypes = ["PMS Appraisal", "PMS Target", "PMS Competency Score"]
-    for dt in emp_crud_doctypes:
-        exists = frappe.db.exists("Custom DocPerm", {"parent": dt, "role": "Employee"})
-        if not exists:
-            frappe.get_doc({
-                "doctype": "Custom DocPerm",
-                "parent": dt,
-                "parenttype": "DocType",
-                "parentfield": "permissions",
-                "role": "Employee",
-                "read": 1,
-                "write": 1,
-                "create": 1,
-                "report": 1
-            }).insert(ignore_permissions=True)
+    # PMS Appraisal Cycle: full CRUD strictly for HR Admin; read-only for HR Manager, System Manager & PMS participants
+    cycle_admin_perms = {
+        "read": 1, "write": 1, "create": 1, "delete": 1,
+        "report": 1, "export": 1, "print": 1, "share": 1,
+    }
+    cycle_read_perms = {
+        "read": 1, "write": 0, "create": 0, "delete": 0,
+        "report": 1, "export": 1, "print": 1, "share": 1,
+    }
+    _upsert_custom_docperm("PMS Appraisal Cycle", "HR Admin", cycle_admin_perms)
+    for role in ["HR Manager", "System Manager"]:
+        _upsert_custom_docperm("PMS Appraisal Cycle", role, cycle_read_perms)
+    for role in ["Employee", "Supervisor", "Reviewer", "Supervisor 2"]:
+        _upsert_custom_docperm("PMS Appraisal Cycle", role, {"read": 1, "write": 0, "create": 0, "delete": 0})
 
-    # HR Admin permissions for Manage Competencies
+    # PMS Appraisal: full CRUD for HR Admin / HR Manager; read-only for System Manager; CRUD (no delete) for primary parties; read for Supervisor 2
+    appraisal_admin_perms = {
+        "read": 1, "write": 1, "create": 1, "delete": 1,
+        "report": 1, "export": 1, "print": 1, "share": 1,
+    }
+    appraisal_read_perms = {
+        "read": 1, "write": 0, "create": 0, "delete": 0,
+        "report": 1, "export": 1, "print": 1, "share": 1,
+    }
+    for role in ["HR Admin", "HR Manager"]:
+        _upsert_custom_docperm("PMS Appraisal", role, appraisal_admin_perms)
+    _upsert_custom_docperm("PMS Appraisal", "System Manager", appraisal_read_perms)
+    for role in ["Employee", "Supervisor", "Reviewer"]:
+        _upsert_custom_docperm("PMS Appraisal", role, {"read": 1, "write": 1, "create": 1, "delete": 0, "report": 1})
+    _upsert_custom_docperm("PMS Appraisal", "Supervisor 2", {"read": 1, "write": 0, "create": 0, "delete": 0, "report": 1})
+
+    # Child tables of PMS Appraisal
+    for dt in ["PMS Target", "PMS Competency Score"]:
+        for role in ["HR Admin", "HR Manager", "Employee", "Supervisor", "Reviewer"]:
+            _upsert_custom_docperm(dt, role, {"read": 1, "write": 1, "create": 1, "delete": 1})
+        for role in ["System Manager", "Supervisor 2"]:
+            _upsert_custom_docperm(dt, role, {"read": 1, "write": 0, "create": 0, "delete": 0})
+
+    # Manage Competencies: full CRUD for HR Admin / HR Manager; read-only for System Manager
     for dt in ["PMS Manage Competencies", "PMS Competency Item"]:
-        exists = frappe.db.exists("Custom DocPerm", {"parent": dt, "role": "HR Admin"})
-        if not exists:
-            frappe.get_doc({
-                "doctype": "Custom DocPerm",
-                "parent": dt,
-                "parenttype": "DocType",
-                "parentfield": "permissions",
-                "role": "HR Admin",
-                "read": 1,
-                "write": 1,
-                "create": 1
-            }).insert(ignore_permissions=True)
+        for role in ["HR Admin", "HR Manager"]:
+            _upsert_custom_docperm(dt, role, {"read": 1, "write": 1, "create": 1, "delete": 1})
+        _upsert_custom_docperm(dt, "System Manager", {"read": 1, "write": 0, "create": 0, "delete": 0})
 
 def setup_property_setters():
     # Make 'grade_group' on PMS Appraisal read-only
