@@ -200,9 +200,9 @@
         if (!target && !is_administrator) {
             if (is_pms_route) {
                 if (frappe.router && frappe.router.set_route) {
-                    frappe.set_route('desk');
+                    frappe.set_route('desktop');
                 } else {
-                    window.location.replace('/desk');
+                    window.location.replace('/desk/desktop');
                 }
             }
             return;
