@@ -30,12 +30,12 @@ app_include_css = [
 	"/assets/gdl_pms/css/gdl_pms.css"
 ]
 app_include_js = [
-	"/assets/gdl_pms/js/pms_employee_dashboard.js",
-	"/assets/gdl_pms/js/pms_supervisor_dashboard.js",
-	"/assets/gdl_pms/js/pms_reviewer_dashboard.js",
-	"/assets/gdl_pms/js/pms_hr_dashboard.js",
-	"/assets/gdl_pms/js/pms_supervisor_2_dashboard.js",
-	"/assets/gdl_pms/js/pms_router_guard.js"
+	"/assets/gdl_pms/js/pms_employee_dashboard.js?v=2026112801",
+	"/assets/gdl_pms/js/pms_supervisor_dashboard.js?v=2026112801",
+	"/assets/gdl_pms/js/pms_reviewer_dashboard.js?v=2026112801",
+	"/assets/gdl_pms/js/pms_hr_dashboard.js?v=2026112801",
+	"/assets/gdl_pms/js/pms_supervisor_2_dashboard.js?v=2026112801",
+	"/assets/gdl_pms/js/pms_router_guard.js?v=2026112801"
 ]
 
 # include js, css files in header of web template
