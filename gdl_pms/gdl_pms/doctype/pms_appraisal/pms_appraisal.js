@@ -778,10 +778,11 @@ function apply_reviews_permissions(frm, can_edit_sup, can_edit_rev) {
 			if (df) df.read_only = ro;
 		}
 
-		// 3. Update grid docfield property
-		try {
-			grid.update_docfield_property(fn, "read_only", ro);
-		} catch(e) {}
+		// 3. Ensure grid header is intact without triggering redundant full grid.refresh()
+		if (grid.parent && $(grid.parent).find(".grid-heading-row .grid-row").length === 0 && grid.make_head) {
+			grid.prevent_build = false;
+			grid.make_head();
+		}
 
 		// 4. Update each grid row & column controls
 		if (grid.grid_rows) {
@@ -818,8 +819,9 @@ function apply_reviews_permissions(frm, can_edit_sup, can_edit_rev) {
 		}
 	});
 
-	if (grid.refresh) {
-		grid.refresh();
+	if (grid.parent && $(grid.parent).find(".grid-heading-row .grid-row").length === 0 && grid.make_head) {
+		grid.prevent_build = false;
+		grid.make_head();
 	}
 }
 
@@ -1324,7 +1326,7 @@ function _sync_competencies_to_table(frm, expected_list, force = false) {
 					row.definition = expected_list[idx].definition;
 					modified = true;
 				}
-				if (!row.weight || row.weight !== expected_list[idx].weight) {
+				if (!row.weight || flt(row.weight, 2) !== flt(expected_list[idx].weight, 2)) {
 					row.weight = expected_list[idx].weight;
 					modified = true;
 				}
@@ -2113,7 +2115,7 @@ frappe.ui.form.on("PMS Appraisal", {
 		if (frm.doc.grade_group) {
 			let comps = frm.doc.competencies || [];
 			let missing_defs = comps.length === 0 || comps.some(c => !c.definition);
-			if (frm.is_new() || frm.doc.plan_status === "Draft" || missing_defs) {
+			if (frm.is_new() || missing_defs) {
 				populate_competencies_for_grade(frm, frm.doc.grade_group || "OS_ESP");
 			}
 		}
