@@ -707,13 +707,17 @@ function rebuild_grid_columns(frm, grid_fieldname, child_doctype, col_configs, m
 		}
 	});
 
-	// 5. Check if current visible columns match target
+	if (target_visible_columns.length === 0) return;
+
+	// 5. Check if current visible columns match target or if header row is missing
 	let current_vis_str = (grid.visible_columns || []).map(col => (col[0] && col[0].fieldname) + ":" + col[1]).join(",");
 	let target_vis_str = target_visible_columns.map(col => (col[0] && col[0].fieldname) + ":" + col[1]).join(",");
-	let needs_rebuild = (current_vis_str !== target_vis_str) || (grid._rendered_pms_mode !== mode_key);
+	let heading_missing = grid.parent ? ($(grid.parent).find(".grid-heading-row .grid-row").length === 0) : false;
+	let needs_rebuild = (current_vis_str !== target_vis_str) || (grid._rendered_pms_mode !== mode_key) || heading_missing;
 
 	if (needs_rebuild) {
 		grid._rendered_pms_mode = mode_key;
+		grid.prevent_build = false;
 		grid.user_defined_columns = [];
 		grid.setup_user_defined_columns = function() { this.user_defined_columns = []; };
 		grid.visible_columns = target_visible_columns;
@@ -728,8 +732,21 @@ function rebuild_grid_columns(frm, grid_fieldname, child_doctype, col_configs, m
 			grid.grid_rows_by_docname = {};
 		}
 
-		if (grid.refresh) {
-			grid.refresh();
+		const do_grid_refresh = () => {
+			if (!grid || !grid.parent) return;
+			grid.prevent_build = false;
+			if (grid.refresh) {
+				grid.refresh();
+			}
+			if ($(grid.parent).find(".grid-heading-row .grid-row").length === 0 && grid.make_head) {
+				grid.make_head();
+			}
+		};
+
+		if (frm.setting_dependency) {
+			setTimeout(do_grid_refresh, 60);
+		} else {
+			do_grid_refresh();
 		}
 	}
 }
@@ -2113,10 +2130,12 @@ frappe.ui.form.on("PMS Appraisal", {
 		}
 
 		try {
-			if (frm.fields_dict["targets"] && frm.fields_dict["targets"].grid) {
+			if (frm.fields_dict["targets"] && frm.fields_dict["targets"].grid && !frm.fields_dict["targets"].grid._pms_precision_set) {
+				frm.fields_dict["targets"].grid._pms_precision_set = true;
 				frm.fields_dict["targets"].grid.update_docfield_property("weight", "precision", "2");
 			}
-			if (frm.fields_dict["competencies"] && frm.fields_dict["competencies"].grid) {
+			if (frm.fields_dict["competencies"] && frm.fields_dict["competencies"].grid && !frm.fields_dict["competencies"].grid._pms_precision_set) {
+				frm.fields_dict["competencies"].grid._pms_precision_set = true;
 				frm.fields_dict["competencies"].grid.update_docfield_property("weight", "precision", "2");
 			}
 		} catch(e){}
