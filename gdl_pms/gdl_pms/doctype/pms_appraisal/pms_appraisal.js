@@ -2184,15 +2184,25 @@ frappe.ui.form.on("PMS Appraisal", {
 		render_plan_history(frm);
 
 		// Dynamic Evaluation of User Roles
-		frappe.call({
-			method: "gdl_pms.gdl_pms.doctype.pms_appraisal.pms_appraisal.get_current_employee",
-			callback: function(r) {
-				let current_emp = r && r.message && r.message.name;
-				frm._current_emp = current_emp;
-				if (current_emp) {
-					window._pms_current_emp = current_emp;
-				}
-				let is_my_doc = frm.is_new() || (current_emp && (current_emp === frm.doc.employee));
+		let refresh_seq = (frm._pms_refresh_seq = (frm._pms_refresh_seq || 0) + 1);
+		const ensure_grid_headers = function() {
+			setTimeout(function() {
+				if (!frm || !frm.doc) return;
+				["targets", "competencies"].forEach(fn => {
+					let g = frm.fields_dict[fn] && frm.fields_dict[fn].grid;
+					if (g && g.parent && $(g.parent).find(".grid-heading-row .grid-row").length === 0 && g.make_head) {
+						g.prevent_build = false;
+						g.make_head();
+					}
+				});
+			}, 80);
+		};
+		const apply_role_ui = function(current_emp) {
+			frm._current_emp = current_emp;
+			if (current_emp) {
+				window._pms_current_emp = current_emp;
+			}
+			let is_my_doc = frm.is_new() || (current_emp && (current_emp === frm.doc.employee));
 				let is_admin = frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 				let is_supervisor = (current_emp && current_emp === frm.doc.supervisor_snapshot) || is_admin;
 				let is_reviewer = (current_emp && current_emp === frm.doc.reviewer_snapshot) || is_admin;
@@ -2603,6 +2613,10 @@ frappe.ui.form.on("PMS Appraisal", {
 										callback: function(res) {
 											if (!res.exc) {
 												frappe.show_alert({message: __('Performance Plan sent for approval successfully.'), indicator: 'green'});
+												if (frm.page && frm.page.clear_inner_toolbar) {
+													frm.page.clear_inner_toolbar();
+												}
+												if (frm.disable_save) frm.disable_save();
 												frm.reload_doc();
 											}
 										}
@@ -2992,8 +3006,23 @@ frappe.ui.form.on("PMS Appraisal", {
 					}
 					return;
 				}
-			}
-		});
+		};
+
+		let cached_emp = frm._current_emp || window._pms_current_emp;
+		if (cached_emp) {
+			apply_role_ui(cached_emp);
+			ensure_grid_headers();
+		} else {
+			frappe.call({
+				method: "gdl_pms.gdl_pms.doctype.pms_appraisal.pms_appraisal.get_current_employee",
+				callback: function(r) {
+					if (frm._pms_refresh_seq !== refresh_seq) return;
+					let current_emp = r && r.message && r.message.name;
+					apply_role_ui(current_emp);
+					ensure_grid_headers();
+				}
+			});
+		}
 	},
 
 	after_save: function(frm) {
