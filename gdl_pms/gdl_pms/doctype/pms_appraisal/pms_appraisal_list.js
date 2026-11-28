@@ -145,6 +145,7 @@ frappe.listview_settings['PMS Appraisal'] = {
 	add_fields: [
 		"employee",
 		"employee_name",
+		"grade_group",
 		"cycle",
 		"calendar_year",
 		"cycle_end_date",
@@ -185,6 +186,10 @@ frappe.listview_settings['PMS Appraisal'] = {
 				return `<span style="font-weight: 600; color: var(--text-color);">${frappe.utils.escape_html(val)}</span>`;
 			}
 			return val || "--";
+		},
+		grade_group(val, df, doc) {
+			if (!val) return `<span class="text-muted small">--</span>`;
+			return `<span class="badge badge-light" style="font-size: 11px; font-weight: 600; padding: 3px 7px;">${frappe.utils.escape_html(val)}</span>`;
 		},
 		plan_status(val, df, doc) {
 			let status = get_pms_plan_display_status(doc);
@@ -233,6 +238,7 @@ frappe.listview_settings['PMS Appraisal'] = {
 	},
 
 	onload: function(listview) {
+		listview.can_create = false;
 		listview.$page && listview.$page.addClass("pms-appraisal-list-view");
 		listview.$result && listview.$result.addClass("pms-appraisal-list-view");
 		$(listview.wrapper).addClass("pms-appraisal-list-view");
@@ -242,6 +248,7 @@ frappe.listview_settings['PMS Appraisal'] = {
 				name: 160,
 				employee: 120,
 				employee_name: 135,
+				grade_group: 110,
 				cycle: 165,
 				plan_status: 210,
 				appraisal_status: 210,
@@ -283,8 +290,8 @@ frappe.listview_settings['PMS Appraisal'] = {
 
 			let is_appraisal = (this._current_view_mode === "appraisal");
 			let fieldnames = is_appraisal
-				? ["employee", "employee_name", "cycle", "appraisal_status", "supervisor_name", "reviewer_name", "total_score", "rating_band"]
-				: ["employee", "employee_name", "cycle", "plan_status", "supervisor_name", "reviewer_name"];
+				? ["employee", "employee_name", "grade_group", "cycle", "appraisal_status", "supervisor_name", "reviewer_name", "total_score", "rating_band"]
+				: ["employee", "employee_name", "grade_group", "cycle", "plan_status", "supervisor_name", "reviewer_name"];
 
 			fieldnames.forEach((fn) => {
 				let orig_df = get_df(fn);
@@ -420,22 +427,9 @@ frappe.listview_settings['PMS Appraisal'] = {
 			}
 		}
 
-		// Primary Action Button
-		let is_supervisor_2_only = frappe.user_roles && frappe.user_roles.includes("PMS Supervisor 2") &&
-			!frappe.user_roles.includes("PMS HR Admin") &&
-			!frappe.user_roles.includes("PMS Employee") &&
-			!frappe.user_roles.includes("PMS Supervisor") &&
-			!frappe.user_roles.includes("PMS Reviewer");
-
-		if (listview.page.btn_primary) {
-			if (is_appraisal_mode || is_supervisor_2_only) {
-				listview.page.btn_primary.hide();
-			} else {
-				listview.page.btn_primary.show();
-				listview.page.set_primary_action(__("Add PMS Performance Plan"), function() {
-					frappe.new_doc("PMS Appraisal");
-				});
-			}
+		// Primary Action Button hidden: plans are auto-generated as Draft by cycles
+		if (listview.page && listview.page.btn_primary) {
+			listview.page.btn_primary.hide();
 		}
 
 		update_pms_sidebar_active(listview._current_view_mode || "plan");
@@ -653,22 +647,9 @@ function attach_pms_view_mode_methods(listview) {
 			}
 		}
 
-		// 3. Update Primary Action Button
-		let is_supervisor_2_only = frappe.user_roles && frappe.user_roles.includes("PMS Supervisor 2") &&
-			!frappe.user_roles.includes("PMS HR Admin") &&
-			!frappe.user_roles.includes("PMS Employee") &&
-			!frappe.user_roles.includes("PMS Supervisor") &&
-			!frappe.user_roles.includes("PMS Reviewer");
-
+		// 3. Primary Action Button hidden: plans are auto-generated as Draft by cycles
 		if (listview.page && listview.page.btn_primary) {
-			if (is_appraisal || is_supervisor_2_only) {
-				listview.page.btn_primary.hide();
-			} else {
-				listview.page.btn_primary.show();
-				listview.page.set_primary_action(__("Add PMS Performance Plan"), function() {
-					frappe.new_doc("PMS Appraisal");
-				});
-			}
+			listview.page.btn_primary.hide();
 		}
 
 		// 4. Update Sidebar Active Item

@@ -641,9 +641,61 @@
         }
     }
 
+    function sync_pms_notification_badge() {
+        if (!is_pms_notification_context()) return;
+        var notif_view = frappe.app && frappe.app.sidebar && frappe.app.sidebar.notifications &&
+            frappe.app.sidebar.notifications.tabs && frappe.app.sidebar.notifications.tabs.notifications;
+        var seen = (notif_view && notif_view.settings && notif_view.settings.seen) ||
+            (frappe.boot && frappe.boot.notification_settings && frappe.boot.notification_settings.seen);
+        if (cint(seen) === 1) {
+            if (notif_view && typeof notif_view.update_count_badge === 'function') {
+                notif_view.update_count_badge(0);
+            }
+            $('.sidebar-notification .sidebar-notification-count').addClass('hidden');
+        }
+    }
+
+    function bind_pms_notification_badge_clear() {
+        if (window._pms_notif_badge_bound) return;
+        window._pms_notif_badge_bound = true;
+        $(document).on('click.pmsNotifCount', '.sidebar-notification', function () {
+            if (!is_pms_notification_context()) return;
+            var notif_view = frappe.app && frappe.app.sidebar && frappe.app.sidebar.notifications &&
+                frappe.app.sidebar.notifications.tabs && frappe.app.sidebar.notifications.tabs.notifications;
+            if (notif_view) {
+                if (notif_view.settings) notif_view.settings.seen = 1;
+                if (frappe.boot && frappe.boot.notification_settings) {
+                    frappe.boot.notification_settings.seen = 1;
+                }
+                if (typeof notif_view.toggle_seen === 'function') {
+                    notif_view.toggle_seen(true);
+                }
+                if (typeof notif_view.update_count_badge === 'function') {
+                    notif_view.update_count_badge(0);
+                }
+            }
+            $('.sidebar-notification .sidebar-notification-count').addClass('hidden');
+        });
+    }
+
+    function hide_pms_list_view_switcher() {
+        if (!is_pms_notification_context()) return;
+        if (window.cur_list && cur_list.views_menu) {
+            $(cur_list.views_menu).hide();
+        }
+        $('.page-actions .custom-btn-group').each(function () {
+            if ($(this).find('[data-view]').length) {
+                $(this).hide();
+            }
+        });
+    }
+
     // Check on route changes & app initialization
     $(document).on('app_ready page-change workspace_rendered form-refresh', function () {
         patch_pms_notifications();
+        bind_pms_notification_badge_clear();
+        sync_pms_notification_badge();
+        hide_pms_list_view_switcher();
         hide_pms_employee_for_hr();
         cleanup_pms_page_modes();
         refresh_notifications_if_context_changed();
@@ -656,6 +708,9 @@
     if (window.frappe && frappe.router) {
         frappe.router.on('change', function () {
             patch_pms_notifications();
+            bind_pms_notification_badge_clear();
+            sync_pms_notification_badge();
+            hide_pms_list_view_switcher();
             hide_pms_employee_for_hr();
             cleanup_pms_page_modes();
             refresh_notifications_if_context_changed();
@@ -668,6 +723,9 @@
 
     // Immediate and staggered initialization checks
     patch_pms_notifications();
+    bind_pms_notification_badge_clear();
+    sync_pms_notification_badge();
+    hide_pms_list_view_switcher();
     patch_breadcrumbs();
     patch_router();
     patch_not_found();

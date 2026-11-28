@@ -596,17 +596,6 @@ gdl_pms.dashboard = {
                         <h2 class="pms-section-title">Quick Actions</h2>
                     </div>
                     <div class="pms-quick-actions-grid">
-                        <div class="pms-action-tile tile-blue" data-action="new-plan">
-                            <div class="pms-action-icon-box">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <line x1="12" y1="11" x2="12" y2="17"></line>
-                                    <line x1="9" y1="14" x2="15" y2="14"></line>
-                                </svg>
-                            </div>
-                            <span class="pms-action-label">Create Performance Plan</span>
-                        </div>
-
                         <div class="pms-action-tile tile-green" data-action="new-amendment">
                             <div class="pms-action-icon-box">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
@@ -667,8 +656,8 @@ gdl_pms.dashboard = {
                         </div>
                         <h2 class="pms-banner-title">Plan. Perform. Grow.</h2>
                         <p class="pms-banner-desc">Track your goals, receive feedback, and achieve your best version.</p>
-                        <button class="btn pms-btn-primary" data-action="new-plan">
-                            Create Performance Plan
+                        <button class="btn pms-btn-primary" data-action="route-plans">
+                            View Performance Plans
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <path d="M5 12h14M13 6l6 6-6 6"/>
                             </svg>
@@ -723,9 +712,7 @@ gdl_pms.dashboard = {
             e.stopPropagation();
             var action = $(this).data('action');
 
-            if (action === 'new-plan') {
-                frappe.new_doc('PMS Appraisal');
-            } else if (action === 'new-amendment') {
+            if (action === 'new-amendment') {
                 frappe.new_doc('PMS Plan Amendment');
             } else if (action === 'route-plans') {
                 frappe.set_route('List', 'PMS Appraisal');

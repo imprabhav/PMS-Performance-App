@@ -978,6 +978,11 @@ body:has(.gdl-pms-dashboard-wrapper) .container,
     font-weight: 700 !important;
 }
 
+/* Hide List View / Report View / Dashboard View / Kanban View switcher inside GDL PMS */
+body.gdl-pms-active .page-actions .custom-btn-group:has([data-view]) {
+    display: none !important;
+}
+
 /* 4. Hide PMS Employee in sidebar for HR Admin */
 .gdl-pms-hr-dashboard-active .sidebar-item-container[data-public-name="PMS Employee"],
 .gdl-pms-hr-dashboard-active .sidebar-item-container[data-link-to="PMS Employee"],
@@ -1627,6 +1632,14 @@ body:has(.gdl-pms-dashboard-wrapper) .container,
     min-width: 135px !important;
     max-width: 135px !important;
     flex: 0 0 135px !important;
+}
+
+.pms-appraisal-list-view .list-row-col[data-fieldname="grade_group"],
+[data-page-route*="PMS Appraisal"] .list-row-col[data-fieldname="grade_group"] {
+    width: 110px !important;
+    min-width: 110px !important;
+    max-width: 110px !important;
+    flex: 0 0 110px !important;
 }
 
 .pms-appraisal-list-view .list-row-col[data-fieldname="cycle"],

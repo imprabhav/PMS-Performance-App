@@ -16,6 +16,7 @@ frappe.listview_settings['PMS Plan Amendment'] = {
 	add_fields: [
 		"employee",
 		"employee_name",
+		"grade_group",
 		"performance_plan",
 		"cycle",
 		"calendar_year",
@@ -49,6 +50,10 @@ frappe.listview_settings['PMS Plan Amendment'] = {
 				return `<span style="font-weight: 600; color: var(--text-color);">${frappe.utils.escape_html(val)}</span>`;
 			}
 			return val || "--";
+		},
+		grade_group(val, df, doc) {
+			if (!val) return `<span class="text-muted small">--</span>`;
+			return `<span class="badge badge-light" style="font-size: 11px; font-weight: 600; padding: 3px 7px;">${frappe.utils.escape_html(val)}</span>`;
 		},
 		amendment_number(val, df, doc) {
 			if (val != null) {
@@ -86,7 +91,7 @@ frappe.listview_settings['PMS Plan Amendment'] = {
 				},
 			});
 
-			let fieldnames = ["employee", "employee_name", "performance_plan", "cycle", "amendment_number", "revision_date", "status"];
+			let fieldnames = ["employee", "employee_name", "grade_group", "performance_plan", "cycle", "amendment_number", "revision_date", "status"];
 			fieldnames.forEach((fn) => {
 				let df = get_df(fn);
 				if (df) {

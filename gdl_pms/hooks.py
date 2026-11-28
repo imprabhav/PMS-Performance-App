@@ -27,15 +27,15 @@ app_logo_url = "/assets/gdl_pms/logo_gdl.png"
 # include js, css files in header of desk.html
 app_include_css = [
 	"/assets/gdl_pms/css/gdl_pms_theme.bundle.css",
-	"/assets/gdl_pms/css/gdl_pms.css?v=2026112804"
+	"/assets/gdl_pms/css/gdl_pms.css?v=2026112807"
 ]
 app_include_js = [
-	"/assets/gdl_pms/js/pms_employee_dashboard.js?v=2026112803",
-	"/assets/gdl_pms/js/pms_supervisor_dashboard.js?v=2026112803",
-	"/assets/gdl_pms/js/pms_reviewer_dashboard.js?v=2026112803",
-	"/assets/gdl_pms/js/pms_hr_dashboard.js?v=2026112803",
-	"/assets/gdl_pms/js/pms_supervisor_2_dashboard.js?v=2026112803",
-	"/assets/gdl_pms/js/pms_router_guard.js?v=2026112803"
+	"/assets/gdl_pms/js/pms_employee_dashboard.js?v=2026112804",
+	"/assets/gdl_pms/js/pms_supervisor_dashboard.js?v=2026112804",
+	"/assets/gdl_pms/js/pms_reviewer_dashboard.js?v=2026112804",
+	"/assets/gdl_pms/js/pms_hr_dashboard.js?v=2026112804",
+	"/assets/gdl_pms/js/pms_supervisor_2_dashboard.js?v=2026112804",
+	"/assets/gdl_pms/js/pms_router_guard.js?v=2026112806"
 ]
 
 # include js, css files in header of web template
