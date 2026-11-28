@@ -27,7 +27,7 @@ app_logo_url = "/assets/gdl_pms/logo_gdl.png"
 # include js, css files in header of desk.html
 app_include_css = [
 	"/assets/gdl_pms/css/gdl_pms_theme.bundle.css",
-	"/assets/gdl_pms/css/gdl_pms.css"
+	"/assets/gdl_pms/css/gdl_pms.css?v=2026112804"
 ]
 app_include_js = [
 	"/assets/gdl_pms/js/pms_employee_dashboard.js?v=2026112803",

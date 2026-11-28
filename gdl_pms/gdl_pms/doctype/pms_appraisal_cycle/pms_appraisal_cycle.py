@@ -315,6 +315,8 @@ def _get_applicable_employees_internal(grade_group=None, cycle_name=None, cycle_
 	filters = {"status": "Active"}
 	if grade_group != "All":
 		filters["grade_group"] = grade_group
+	else:
+		filters["grade_group"] = ["is", "set"]
 
 	employees = frappe.get_all(
 		"Employee",

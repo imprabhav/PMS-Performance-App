@@ -964,6 +964,20 @@ body:has(.gdl-pms-dashboard-wrapper) .container,
     line-height: 1.4 !important;
 }
 
+/* Bold Targets and Competencies headers & table column headers */
+.frappe-control[data-fieldtype="Table"][data-fieldname="targets"] > .grid-field > .control-label,
+.frappe-control[data-fieldtype="Table"][data-fieldname="competencies"] > .grid-field > .control-label {
+    font-weight: 700 !important;
+    color: #0f172a !important;
+}
+
+.frappe-control[data-fieldtype="Table"][data-fieldname="targets"] .form-grid > .grid-heading-row,
+.frappe-control[data-fieldtype="Table"][data-fieldname="targets"] .form-grid > .grid-heading-row .static-area,
+.frappe-control[data-fieldtype="Table"][data-fieldname="competencies"] .form-grid > .grid-heading-row,
+.frappe-control[data-fieldtype="Table"][data-fieldname="competencies"] .form-grid > .grid-heading-row .static-area {
+    font-weight: 700 !important;
+}
+
 /* 4. Hide PMS Employee in sidebar for HR Admin */
 .gdl-pms-hr-dashboard-active .sidebar-item-container[data-public-name="PMS Employee"],
 .gdl-pms-hr-dashboard-active .sidebar-item-container[data-link-to="PMS Employee"],
