@@ -81,7 +81,7 @@ class PMSPlanAmendment(Document):
         # Employee cannot modify either.
         user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
         roles = frappe.get_roles()
-        is_admin = any(r in roles for r in ["Administrator", "System Manager", "HR Manager", "HR Admin"])
+        is_admin = frappe.session.user == "Administrator" or "PMS HR Admin" in roles
         if not is_admin:
             is_supervisor_user = bool(user_emp and self.supervisor_snapshot and user_emp == self.supervisor_snapshot and user_emp != self.employee)
             is_reviewer_user = bool(user_emp and self.reviewer_snapshot and user_emp == self.reviewer_snapshot and user_emp != self.employee)
@@ -114,7 +114,7 @@ def submit_amendment(docname):
 
     # Check amendment window open on performance plan
     plan_window_open = frappe.db.get_value("PMS Appraisal", doc.performance_plan, "amendment_window_open")
-    is_hr = any(r in frappe.get_roles() for r in ["Administrator", "System Manager", "HR Admin"])
+    is_hr = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
     if not plan_window_open and not is_hr:
         frappe.throw("The Amendment Window for this Performance Plan is currently closed by HR Admin.")
 
@@ -127,7 +127,7 @@ def submit_amendment(docname):
 
     # Validate user is the employee or System Manager
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    if doc.employee != user_emp and "System Manager" not in frappe.get_roles():
+    if doc.employee != user_emp and frappe.session.user != "Administrator" and "PMS HR Admin" not in frappe.get_roles():
         frappe.throw("Only the assigned Employee can submit this amendment request.")
 
     doc.status = "Pending Supervisor Approval"
@@ -147,7 +147,7 @@ def submit_amendment(docname):
 def approve_amendment(docname, revised_targets=None):
     doc = frappe.get_doc("PMS Plan Amendment", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    is_sys_mgr = "System Manager" in frappe.get_roles()
+    is_sys_mgr = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
 
     if revised_targets:
         parsed = json.loads(revised_targets) if isinstance(revised_targets, str) else revised_targets
@@ -218,7 +218,7 @@ def reject_amendment(docname, remark, revised_targets=None):
 
     doc = frappe.get_doc("PMS Plan Amendment", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    is_sys_mgr = "System Manager" in frappe.get_roles()
+    is_sys_mgr = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
 
     has_modifications = False
     if revised_targets:
@@ -323,7 +323,7 @@ def get_permission_query_conditions(user):
     if not user:
         user = frappe.session.user
 
-    if user == "Administrator" or "System Manager" in frappe.get_roles(user) or "HR Manager" in frappe.get_roles(user) or "HR Admin" in frappe.get_roles(user):
+    if user == "Administrator" or "PMS HR Admin" in frappe.get_roles(user):
         return ""
 
     employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
@@ -338,7 +338,7 @@ def has_permission(doc, ptype="read", user=None):
         user = frappe.session.user
 
     roles = frappe.get_roles(user)
-    if user == "Administrator" or "System Manager" in roles or "HR Manager" in roles or "HR Admin" in roles:
+    if user == "Administrator" or "PMS HR Admin" in roles:
         return True
 
     employee = frappe.db.get_value("Employee", {"user_id": user}, "name")

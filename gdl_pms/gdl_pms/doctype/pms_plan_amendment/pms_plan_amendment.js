@@ -75,7 +75,7 @@ frappe.ui.form.on("PMS Plan Amendment", {
             method: "gdl_pms.gdl_pms.doctype.pms_appraisal.pms_appraisal.get_current_employee",
             callback: function(r) {
                 let current_emp = r && r.message && r.message.name;
-                let is_admin = frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager") || frappe.session.user === "Administrator";
+                let is_admin = frappe.user_roles.includes("PMS HR Admin") || frappe.session.user === "Administrator";
                 let is_employee = (current_emp && current_emp === frm.doc.employee) || is_admin;
                 let is_supervisor = (current_emp && current_emp === frm.doc.supervisor_snapshot) || is_admin;
                 let is_reviewer = (current_emp && current_emp === frm.doc.reviewer_snapshot) || is_admin;
@@ -368,7 +368,7 @@ frappe.ui.form.on("PMS Target", {
             scoring_cols.forEach(f => grid_row.toggle_display(f, false));
             grid_row.toggle_display("target_reviews", true);
 
-            let is_admin = frm._is_admin !== undefined ? frm._is_admin : (frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager"));
+            let is_admin = frm._is_admin !== undefined ? frm._is_admin : (frappe.user_roles.includes("PMS HR Admin") || frappe.session.user === "Administrator");
             let is_supervisor = frm._is_supervisor !== undefined ? frm._is_supervisor : false;
             let is_reviewer = frm._is_reviewer !== undefined ? frm._is_reviewer : false;
             let status = frm.doc.status || "Draft";

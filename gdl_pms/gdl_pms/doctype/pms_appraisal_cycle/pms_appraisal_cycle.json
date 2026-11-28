@@ -197,49 +197,25 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "HR Admin",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "HR Manager",
+   "role": "PMS HR Admin",
    "share": 1,
    "write": 1
   },
   {
    "read": 1,
-   "role": "Employee"
+   "role": "PMS Employee"
   },
   {
    "read": 1,
-   "role": "Supervisor"
+   "role": "PMS Supervisor"
   },
   {
    "read": 1,
-   "role": "Reviewer"
+   "role": "PMS Reviewer"
   },
   {
    "read": 1,
-   "role": "Supervisor 2"
+   "role": "PMS Supervisor 2"
   }
  ],
  "row_format": "Dynamic",

@@ -870,7 +870,7 @@ function toggle_scoring_visibility(frm, is_appraisal) {
 			frm.toggle_display("cycle", true);
 			frm.set_df_property("cycle", "reqd", 1);
 
-			let is_admin = frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager");
+			let is_admin = frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 			frm.set_df_property("employee", "hidden", is_admin ? 0 : 1);
 			frm.toggle_display("employee", is_admin);
 
@@ -891,7 +891,7 @@ function toggle_scoring_visibility(frm, is_appraisal) {
 		}
 
 		// Rebuild plan columns for targets
-		let is_admin_plan = frm._is_admin !== undefined ? frm._is_admin : (frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager"));
+		let is_admin_plan = frm._is_admin !== undefined ? frm._is_admin : (frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator"));
 		let current_emp_plan = frm._current_emp;
 		let is_my_doc_plan = frm._is_my_doc !== undefined ? frm._is_my_doc : (frm.is_new() || (current_emp_plan && (current_emp_plan === frm.doc.employee)));
 		let is_supervisor_plan = frm._is_supervisor !== undefined ? frm._is_supervisor : ((current_emp_plan && current_emp_plan === frm.doc.supervisor_snapshot) || is_admin_plan);
@@ -1592,7 +1592,7 @@ function render_plan_agreement(frm) {
 
 	// 2. If approved but agreement is pending (Reviewer approved plan, link shared to employee to tick)
 	if (is_pending_post_approval_agreement) {
-		let is_admin = frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("Administrator") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager") || (frappe.session && frappe.session.user === "Administrator");
+		let is_admin = frappe.user_roles.includes("Administrator") || frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 		let is_my_doc = frm._is_my_doc !== undefined ? frm._is_my_doc : (frm._current_emp && frm._current_emp === frm.doc.employee);
 		let can_confirm = (is_my_doc || is_admin);
 
@@ -1667,7 +1667,7 @@ function render_plan_agreement(frm) {
 	}
 
 	let current_val = frm.doc.plan_agreement || "";
-	let is_admin = frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("Administrator") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager") || (frappe.session && frappe.session.user === "Administrator");
+	let is_admin = frappe.user_roles.includes("Administrator") || frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 	let is_locked = frm.doc.locked || (frm.doc.plan_status === "Approved" && frm.doc.workflow_state === "Monitoring") || (frm.doc.workflow_state === "Appraisal Open") || (frm.doc.workflow_state === "Appraisal Completed");
 	
 	let current_emp = frm._current_emp || window._pms_current_emp || get_cached_current_emp();
@@ -1887,7 +1887,7 @@ function render_plan_agreement(frm) {
 			let is_my = (frm._is_my_doc !== undefined)
 				? frm._is_my_doc
 				: (frm.is_new() || (cur_emp && cur_emp === frm.doc.employee) || (frappe.session.user && frm.doc.owner === frappe.session.user));
-			let is_adm = frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("Administrator") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager") || (frappe.session && frappe.session.user === "Administrator");
+			let is_adm = frappe.user_roles.includes("Administrator") || frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 
 			if (!is_my && !is_adm && frm._is_my_doc === false) {
 				return;
@@ -1985,7 +1985,7 @@ frappe.ui.form.on("PMS Appraisal", {
 				}
 			};
 		});
-		if (!frappe.user_roles.includes("HR Admin") && !frappe.user_roles.includes("System Manager")) {
+		if (!frappe.user_roles.includes("PMS HR Admin") && !(frappe.session && frappe.session.user === "Administrator")) {
 			frm.set_df_property("employee", "read_only", 1);
 		}
 	},
@@ -2172,7 +2172,7 @@ frappe.ui.form.on("PMS Appraisal", {
 					window._pms_current_emp = current_emp;
 				}
 				let is_my_doc = frm.is_new() || (current_emp && (current_emp === frm.doc.employee));
-				let is_admin = frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager");
+				let is_admin = frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 				let is_supervisor = (current_emp && current_emp === frm.doc.supervisor_snapshot) || is_admin;
 				let is_reviewer = (current_emp && current_emp === frm.doc.reviewer_snapshot) || is_admin;
 				frm._is_admin = is_admin;
@@ -2182,7 +2182,7 @@ frappe.ui.form.on("PMS Appraisal", {
 
 				// Refresh agreement section with confirmed employee context
 				render_plan_agreement(frm);
-				let is_supervisor_2_only = frappe.user_roles.includes("Supervisor 2") && !is_admin && !frappe.user_roles.includes("Supervisor") && !frappe.user_roles.includes("Reviewer");
+				let is_supervisor_2_only = frappe.user_roles.includes("PMS Supervisor 2") && !is_admin && !frappe.user_roles.includes("PMS Supervisor") && !frappe.user_roles.includes("PMS Reviewer");
 				let is_supervisor_2_for_this_doc = (current_emp && frm.doc.supervisor_2_snapshot === current_emp) && !is_my_doc && !is_admin;
 
 				// Supervisor 2: Strict Read-Only Observer
@@ -3028,7 +3028,7 @@ frappe.ui.form.on("PMS Target", {
 
 		if (!is_app) {
 			scoring_cols.forEach(f => grid_row.toggle_display(f, false));
-			let is_admin = frm._is_admin !== undefined ? frm._is_admin : (frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager"));
+			let is_admin = frm._is_admin !== undefined ? frm._is_admin : (frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator"));
 			let current_emp = frm._current_emp;
 			let is_my_doc = frm._is_my_doc !== undefined ? frm._is_my_doc : (frm.is_new() || (current_emp && (current_emp === frm.doc.employee)));
 			let is_supervisor = frm._is_supervisor !== undefined ? frm._is_supervisor : ((current_emp && current_emp === frm.doc.supervisor_snapshot) || is_admin);
@@ -3077,7 +3077,7 @@ frappe.ui.form.on("PMS Target", {
 			let is_sup_stage = (app_status === "Pending Supervisor Review");
 			let is_rev_stage = (app_status === "Disputed - Pending Reviewer" || app_status === "Pending Reviewer Review");
 
-			let is_admin = frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager");
+			let is_admin = frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 			let current_emp = frm._current_emp;
 			let is_supervisor = (current_emp && current_emp === frm.doc.supervisor_snapshot) || is_admin;
 			let is_reviewer = (current_emp && current_emp === frm.doc.reviewer_snapshot) || is_admin;
@@ -3117,7 +3117,7 @@ frappe.ui.form.on("PMS Target", {
 	},
 	reviewer_score: function(frm, cdt, cdn) {
 		let app_status = frm.doc.appraisal_status;
-		let is_admin = frappe.user_roles.includes("System Manager");
+		let is_admin = frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 		if (app_status !== "Disputed - Pending Reviewer" && app_status !== "Pending Reviewer Review" && !is_admin) {
 			frappe.model.set_value(cdt, cdn, "reviewer_score", 0);
 			frappe.msgprint({
@@ -3142,7 +3142,7 @@ frappe.ui.form.on("PMS Target", {
 	},
 	reviewer_remark: function(frm, cdt, cdn) {
 		let app_status = frm.doc.appraisal_status;
-		let is_admin = frappe.user_roles.includes("System Manager");
+		let is_admin = frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 		if (app_status !== "Disputed - Pending Reviewer" && app_status !== "Pending Reviewer Review" && !is_admin) {
 			frappe.model.set_value(cdt, cdn, "reviewer_remark", "");
 			frappe.msgprint({
@@ -3154,7 +3154,7 @@ frappe.ui.form.on("PMS Target", {
 	},
 	self_score: function(frm, cdt, cdn) {
 		let app_status = frm.doc.appraisal_status;
-		let is_admin = frappe.user_roles.includes("System Manager");
+		let is_admin = frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 		if (app_status !== "Self-Assessment Pending" && !is_admin) {
 			frappe.msgprint({
 				title: __("Not Allowed"),
@@ -3205,7 +3205,7 @@ frappe.ui.form.on("PMS Competency Score", {
 			let is_sup_stage = (app_status === "Pending Supervisor Review");
 			let is_rev_stage = (app_status === "Disputed - Pending Reviewer" || app_status === "Pending Reviewer Review");
 
-			let is_admin = frappe.user_roles.includes("System Manager") || frappe.user_roles.includes("HR Admin") || frappe.user_roles.includes("HR Manager");
+			let is_admin = frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 			let current_emp = frm._current_emp;
 			let is_supervisor = (current_emp && current_emp === frm.doc.supervisor_snapshot) || is_admin;
 			let is_reviewer = (current_emp && current_emp === frm.doc.reviewer_snapshot) || is_admin;
@@ -3241,7 +3241,7 @@ frappe.ui.form.on("PMS Competency Score", {
 	},
 	reviewer_rating: function(frm, cdt, cdn) {
 		let app_status = frm.doc.appraisal_status;
-		let is_admin = frappe.user_roles.includes("System Manager");
+		let is_admin = frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 		if (app_status !== "Disputed - Pending Reviewer" && app_status !== "Pending Reviewer Review" && !is_admin) {
 			frappe.model.set_value(cdt, cdn, "reviewer_rating", 0);
 			frappe.msgprint({
@@ -3266,7 +3266,7 @@ frappe.ui.form.on("PMS Competency Score", {
 	},
 	reviewer_remark: function(frm, cdt, cdn) {
 		let app_status = frm.doc.appraisal_status;
-		let is_admin = frappe.user_roles.includes("System Manager");
+		let is_admin = frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 		if (app_status !== "Disputed - Pending Reviewer" && app_status !== "Pending Reviewer Review" && !is_admin) {
 			frappe.model.set_value(cdt, cdn, "reviewer_remark", "");
 			frappe.msgprint({
@@ -3278,7 +3278,7 @@ frappe.ui.form.on("PMS Competency Score", {
 	},
 	self_rating: function(frm, cdt, cdn) {
 		let app_status = frm.doc.appraisal_status;
-		let is_admin = frappe.user_roles.includes("System Manager");
+		let is_admin = frappe.user_roles.includes("PMS HR Admin") || (frappe.session && frappe.session.user === "Administrator");
 		if (app_status !== "Self-Assessment Pending" && !is_admin) {
 			frappe.msgprint({
 				title: __("Not Allowed"),

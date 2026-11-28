@@ -24,16 +24,16 @@
  "quick_lists": [],
  "roles": [
   {
-   "role": "Employee"
+   "role": "PMS Employee"
   },
   {
-   "role": "Supervisor"
+   "role": "PMS Supervisor"
   },
   {
-   "role": "Supervisor 2"
+   "role": "PMS Supervisor 2"
   },
   {
-   "role": "Reviewer"
+   "role": "PMS Reviewer"
   }
  ],
  "sequence_id": 0.0,

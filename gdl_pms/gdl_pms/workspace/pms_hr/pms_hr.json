@@ -85,13 +85,7 @@
  "quick_lists": [],
  "roles": [
   {
-   "role": "HR Admin"
-  },
-  {
-   "role": "HR Manager"
-  },
-  {
-   "role": "System Manager"
+   "role": "PMS HR Admin"
   }
  ],
  "sequence_id": 0.0,

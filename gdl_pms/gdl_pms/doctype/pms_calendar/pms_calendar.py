@@ -17,9 +17,9 @@ class PMSCalendar(Document):
 		if user == "Administrator":
 			return
 		roles = frappe.get_roles(user)
-		if not any(r in roles for r in ["HR Admin", "System Manager", "HR Manager"]):
+		if "PMS HR Admin" not in roles:
 			frappe.throw(
-				_("Only HR Admin / System Manager can create or modify PMS Calendar."),
+				_("Only PMS HR Admin can create or modify PMS Calendar."),
 				frappe.PermissionError
 			)
 
@@ -65,7 +65,7 @@ def get_permission_query_conditions(user):
 		return ""
 
 	roles = frappe.get_roles(user)
-	if "HR Admin" in roles or "System Manager" in roles or "HR Manager" in roles:
+	if "PMS HR Admin" in roles:
 		return ""
 
 	# Restrict access exclusively for non-HR users
@@ -79,7 +79,7 @@ def has_permission(doc, ptype="read", user=None):
 		return True
 
 	roles = frappe.get_roles(user)
-	if "HR Admin" in roles or "System Manager" in roles or "HR Manager" in roles:
+	if "PMS HR Admin" in roles:
 		return True
 
 	return False

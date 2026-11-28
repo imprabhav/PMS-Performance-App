@@ -3,25 +3,25 @@ import frappe
 def auto_assign_roles(doc, method):
     # For Employee
     if doc.user_id:
-        assign_role_and_permission(doc.user_id, "Employee", doc.name)
+        assign_role_and_permission(doc.user_id, "PMS Employee", doc.name)
 
     # For Supervisor
     if doc.reports_to:
         supervisor_user = frappe.db.get_value("Employee", doc.reports_to, "user_id")
         if supervisor_user:
-            assign_role_and_permission(supervisor_user, "Supervisor", doc.name)
+            assign_role_and_permission(supervisor_user, "PMS Supervisor", doc.name)
             
     # For Reviewer
     if doc.get("reviewer"):
         reviewer_user = frappe.db.get_value("Employee", doc.reviewer, "user_id")
         if reviewer_user:
-            assign_role_and_permission(reviewer_user, "Reviewer", doc.name)
+            assign_role_and_permission(reviewer_user, "PMS Reviewer", doc.name)
 
     # For Supervisor 2
     if doc.get("supervisor_2"):
         s2_user = frappe.db.get_value("Employee", doc.supervisor_2, "user_id")
         if s2_user:
-            assign_role_and_permission(s2_user, "Supervisor 2", doc.name)
+            assign_role_and_permission(s2_user, "PMS Supervisor 2", doc.name)
 
         # Sync supervisor_2_snapshot to employee's existing appraisals and amendments
         frappe.db.sql("""
@@ -47,7 +47,10 @@ def assign_role_and_permission(user_id, role, employee_id):
         except Exception as e:
             frappe.logger().error(f"Failed to assign {role} role to user {user_id}: {e}")
 
-    # 2. Assign User Permission
+    # 2. Assign User Permission (skip for PMS HR Admin so they can manage all employees; scope strictly to PMS Appraisal)
+    if "PMS HR Admin" in frappe.get_roles(user_id):
+        return
+
     perm_name = frappe.db.get_value("User Permission", 
         {"user": user_id, "allow": "Employee", "for_value": employee_id, "applicable_for": "PMS Appraisal"})
     
@@ -58,6 +61,7 @@ def assign_role_and_permission(user_id, role, employee_id):
                 "user": user_id,
                 "allow": "Employee",
                 "for_value": employee_id,
+                "apply_to_all_doctypes": 0,
                 "applicable_for": "PMS Appraisal",
                 "hide_descendants": 0
             })

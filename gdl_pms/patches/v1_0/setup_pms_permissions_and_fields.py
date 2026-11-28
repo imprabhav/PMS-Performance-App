@@ -42,11 +42,12 @@ def execute():
 
 def setup_roles():
     roles = [
-        {"role_name": "HR Admin", "desk_access": 1},
-        {"role_name": "Supervisor 2", "desk_access": 1},
-        {"role_name": "Reviewer", "desk_access": 1},
-        {"role_name": "Supervisor", "desk_access": 1},
-        {"role_name": "Employee", "desk_access": 1},
+        {"role_name": "PMS HR Admin", "desk_access": 1},
+        {"role_name": "PMS Supervisor 2", "desk_access": 1},
+        {"role_name": "PMS Reviewer", "desk_access": 1},
+        {"role_name": "PMS Supervisor", "desk_access": 1},
+        {"role_name": "PMS Employee", "desk_access": 1},
+        {"role_name": "PMS PERC", "desk_access": 1},
     ]
     for r in roles:
         if not frappe.db.exists("Role", r["role_name"]):
@@ -160,64 +161,90 @@ def _upsert_custom_docperm(doctype, role, perms):
 
 
 def setup_permissions():
+    # Clean up legacy non-PMS role Custom DocPerms on PMS DocTypes so only dedicated PMS * roles control access
+    pms_doctypes = [
+        "PMS Appraisal Cycle",
+        "PMS Appraisal",
+        "PMS Target",
+        "PMS Competency Score",
+        "PMS Manage Competencies",
+        "PMS Competency Item",
+        "PMS Plan Amendment",
+        "PMS Grade Group",
+        "PMS Calendar",
+        "PERC Case",
+    ]
+    legacy_roles = ["Employee", "Supervisor", "Supervisor 2", "Reviewer", "HR Admin", "HR Manager", "System Manager"]
+    for dt in pms_doctypes:
+        for role in legacy_roles:
+            stale = frappe.get_all("Custom DocPerm", filters={"parent": dt, "role": role}, pluck="name")
+            for name in stale:
+                frappe.delete_doc("Custom DocPerm", name, ignore_permissions=True)
+
     # Grant Page read permissions to PMS roles
-    page_roles = ["Desk User", "Employee", "Supervisor", "Supervisor 2", "Reviewer", "HR Admin", "System Manager", "All"]
+    page_roles = ["Desk User", "PMS Employee", "PMS Supervisor", "PMS Supervisor 2", "PMS Reviewer", "PMS HR Admin", "PMS PERC", "All"]
     for role in page_roles:
         _upsert_custom_docperm("Page", role, {
             "read": 1, "select": 1, "write": 0, "create": 0,
             "delete": 0, "report": 0, "export": 0, "share": 0,
         })
 
-    # Grant HR Admin read permissions to standard DocTypes
+    # Grant PMS HR Admin read permissions to standard DocTypes
     for dt in ["Employee", "Department", "Designation"]:
-        _upsert_custom_docperm(dt, "HR Admin", {"read": 1})
+        _upsert_custom_docperm(dt, "PMS HR Admin", {"read": 1})
 
-    # Grant Employee role read access to Employee
-    _upsert_custom_docperm("Employee", "Employee", {"read": 1})
+    # Grant PMS Employee role read access to Employee
+    _upsert_custom_docperm("Employee", "PMS Employee", {"read": 1})
 
-    # PMS Appraisal Cycle: full CRUD strictly for HR Admin; read-only for HR Manager, System Manager & PMS participants
+    # PMS Appraisal Cycle: full CRUD strictly for PMS HR Admin; read-only for other PMS roles
     cycle_admin_perms = {
         "read": 1, "write": 1, "create": 1, "delete": 1,
         "report": 1, "export": 1, "print": 1, "share": 1,
     }
-    cycle_read_perms = {
-        "read": 1, "write": 0, "create": 0, "delete": 0,
-        "report": 1, "export": 1, "print": 1, "share": 1,
-    }
-    _upsert_custom_docperm("PMS Appraisal Cycle", "HR Admin", cycle_admin_perms)
-    for role in ["HR Manager", "System Manager"]:
-        _upsert_custom_docperm("PMS Appraisal Cycle", role, cycle_read_perms)
-    for role in ["Employee", "Supervisor", "Reviewer", "Supervisor 2"]:
+    _upsert_custom_docperm("PMS Appraisal Cycle", "PMS HR Admin", cycle_admin_perms)
+    for role in ["PMS Employee", "PMS Supervisor", "PMS Reviewer", "PMS Supervisor 2", "PMS PERC"]:
         _upsert_custom_docperm("PMS Appraisal Cycle", role, {"read": 1, "write": 0, "create": 0, "delete": 0})
 
-    # PMS Appraisal: full CRUD for HR Admin / HR Manager; read-only for System Manager; CRUD (no delete) for primary parties; read for Supervisor 2
+    # PMS Appraisal: full CRUD for PMS HR Admin; CRUD (no delete) for primary parties; read for PMS Supervisor 2 / PMS PERC
     appraisal_admin_perms = {
         "read": 1, "write": 1, "create": 1, "delete": 1,
         "report": 1, "export": 1, "print": 1, "share": 1,
     }
-    appraisal_read_perms = {
-        "read": 1, "write": 0, "create": 0, "delete": 0,
-        "report": 1, "export": 1, "print": 1, "share": 1,
-    }
-    for role in ["HR Admin", "HR Manager"]:
-        _upsert_custom_docperm("PMS Appraisal", role, appraisal_admin_perms)
-    _upsert_custom_docperm("PMS Appraisal", "System Manager", appraisal_read_perms)
-    for role in ["Employee", "Supervisor", "Reviewer"]:
+    _upsert_custom_docperm("PMS Appraisal", "PMS HR Admin", appraisal_admin_perms)
+    for role in ["PMS Employee", "PMS Supervisor", "PMS Reviewer"]:
         _upsert_custom_docperm("PMS Appraisal", role, {"read": 1, "write": 1, "create": 1, "delete": 0, "report": 1})
-    _upsert_custom_docperm("PMS Appraisal", "Supervisor 2", {"read": 1, "write": 0, "create": 0, "delete": 0, "report": 1})
+    for role in ["PMS Supervisor 2", "PMS PERC"]:
+        _upsert_custom_docperm("PMS Appraisal", role, {"read": 1, "write": 0, "create": 0, "delete": 0, "report": 1})
 
     # Child tables of PMS Appraisal
     for dt in ["PMS Target", "PMS Competency Score"]:
-        for role in ["HR Admin", "HR Manager", "Employee", "Supervisor", "Reviewer"]:
+        for role in ["PMS HR Admin", "PMS Employee", "PMS Supervisor", "PMS Reviewer"]:
             _upsert_custom_docperm(dt, role, {"read": 1, "write": 1, "create": 1, "delete": 1})
-        for role in ["System Manager", "Supervisor 2"]:
+        for role in ["PMS Supervisor 2", "PMS PERC"]:
             _upsert_custom_docperm(dt, role, {"read": 1, "write": 0, "create": 0, "delete": 0})
 
-    # Manage Competencies: full CRUD for HR Admin / HR Manager; read-only for System Manager
+    # Manage Competencies: full CRUD strictly for PMS HR Admin
     for dt in ["PMS Manage Competencies", "PMS Competency Item"]:
-        for role in ["HR Admin", "HR Manager"]:
-            _upsert_custom_docperm(dt, role, {"read": 1, "write": 1, "create": 1, "delete": 1})
-        _upsert_custom_docperm(dt, "System Manager", {"read": 1, "write": 0, "create": 0, "delete": 0})
+        _upsert_custom_docperm(dt, "PMS HR Admin", {"read": 1, "write": 1, "create": 1, "delete": 1})
+
+    # PMS Plan Amendment
+    _upsert_custom_docperm("PMS Plan Amendment", "PMS HR Admin", appraisal_admin_perms)
+    for role in ["PMS Employee", "PMS Supervisor", "PMS Reviewer"]:
+        _upsert_custom_docperm("PMS Plan Amendment", role, {"read": 1, "write": 1, "create": 1, "delete": 0, "report": 1})
+    _upsert_custom_docperm("PMS Plan Amendment", "PMS Supervisor 2", {"read": 1, "write": 0, "create": 0, "delete": 0})
+
+    # PMS Grade Group
+    _upsert_custom_docperm("PMS Grade Group", "PMS HR Admin", {"read": 1, "write": 1, "create": 1, "delete": 1})
+    for role in ["PMS Employee", "PMS Supervisor", "PMS Reviewer", "PMS Supervisor 2", "PMS PERC"]:
+        _upsert_custom_docperm("PMS Grade Group", role, {"read": 1, "write": 0, "create": 0, "delete": 0})
+
+    # PMS Calendar: strictly PMS HR Admin
+    _upsert_custom_docperm("PMS Calendar", "PMS HR Admin", {"read": 1, "write": 1, "create": 1, "delete": 1})
+
+    # PERC Case
+    _upsert_custom_docperm("PERC Case", "PMS HR Admin", appraisal_admin_perms)
+    for role in ["PMS PERC", "PMS Employee", "PMS Supervisor", "PMS Reviewer", "PMS Supervisor 2"]:
+        _upsert_custom_docperm("PERC Case", role, {"read": 1, "write": 1, "create": 1, "delete": 0, "report": 1})
 
 def setup_property_setters():
     # Make 'grade_group' on PMS Appraisal read-only

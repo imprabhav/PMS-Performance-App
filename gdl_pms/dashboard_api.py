@@ -602,7 +602,7 @@ def get_supervisor_2_dashboard_data():
     if employee_id:
         monitored_emps = frappe.db.get_all("Employee", filters={"supervisor_2": employee_id}, pluck="name")
 
-    if employee_id and "System Manager" not in frappe.get_roles() and "Administrator" != user:
+    if employee_id and "PMS HR Admin" not in frappe.get_roles() and "Administrator" != user:
         conditions = ["`tabPMS Appraisal`.supervisor_2_snapshot = %(emp)s"]
         params = {"emp": employee_id}
         if monitored_emps:

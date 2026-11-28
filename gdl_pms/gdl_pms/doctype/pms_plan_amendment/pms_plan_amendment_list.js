@@ -3,13 +3,12 @@
 
 function is_managerial_user() {
 	let roles = frappe.user_roles || (frappe.boot && frappe.boot.user && frappe.boot.user.roles) || [];
-	if (roles.includes("HR Admin") || roles.includes("HR Manager")) {
-		return false;
-	}
 	return roles.some(r => [
-		"Supervisor",
-		"Supervisor 2",
-		"Reviewer"
+		"PMS HR Admin",
+		"Administrator",
+		"PMS Supervisor",
+		"PMS Supervisor 2",
+		"PMS Reviewer"
 	].includes(r));
 }
 
@@ -130,8 +129,8 @@ frappe.listview_settings['PMS Plan Amendment'] = {
 };
 
 function setup_pms_amendment_scope_system(listview) {
-	let is_hr_admin = (frappe.user_roles || []).some(r => ["HR Admin", "HR Manager"].includes(r));
-	let can_team_initial = !is_hr_admin && is_managerial_user();
+	let is_hr_admin = (frappe.user_roles || []).includes("PMS HR Admin");
+	let can_team_initial = is_managerial_user();
 
 	// 1. Fetch user performance context
 	if (!listview._pms_context_loading) {
@@ -142,7 +141,7 @@ function setup_pms_amendment_scope_system(listview) {
 				listview._pms_context_loading = false;
 				if (r && r.message) {
 					listview._pms_context = r.message;
-					let can_see_team = !is_hr_admin && (r.message.can_see_team && is_managerial_user());
+					let can_see_team = r.message.can_see_team && is_managerial_user();
 					if (!can_see_team) {
 						listview._current_amendment_scope = "all";
 						listview.$page.find('.pms-scope-bar').remove();
@@ -160,13 +159,13 @@ function setup_pms_amendment_scope_system(listview) {
 		});
 	}
 
-	// 2. Initialize scope: normal employees and HR Admin default to "all" without extra filter pills
-	if (is_hr_admin || !can_team_initial) {
+	// 2. Initialize scope: normal employees default to "all"; HR Admin defaults to "all" (with scope bar visible); managers default to "team"
+	if (!can_team_initial) {
 		listview._current_amendment_scope = "all";
 		let user_key = "pms_amendment_scope_" + (frappe.session.user || "default");
 		try { localStorage.removeItem(user_key); } catch(e) {}
 	} else if (!listview._current_amendment_scope) {
-		let initial_scope = "team";
+		let initial_scope = is_hr_admin ? "all" : "team";
 		let user_key = "pms_amendment_scope_" + (frappe.session.user || "default");
 		if (frappe.route_options && frappe.route_options.scope) {
 			initial_scope = frappe.route_options.scope;
@@ -179,12 +178,6 @@ function setup_pms_amendment_scope_system(listview) {
 
 	// 3. Render Scope Bar UI
 	listview.render_pms_scope_bar = function() {
-		let is_hr_admin = (frappe.user_roles || []).some(r => ["HR Admin", "HR Manager"].includes(r));
-		if (is_hr_admin) {
-			listview.$page.find('.pms-scope-bar').remove();
-			return;
-		}
-
 		let ctx = listview._pms_context;
 		let can_team = is_managerial_user() && (ctx ? ctx.can_see_team : true);
 		if (!can_team) {
@@ -298,9 +291,8 @@ function setup_pms_amendment_scope_system(listview) {
 			return;
 		}
 
-		let is_hr_admin = (frappe.user_roles || []).some(r => ["HR Admin", "HR Manager"].includes(r));
 		let ctx = listview._pms_context || {};
-		let can_team = !is_hr_admin && is_managerial_user() && (ctx.can_see_team !== false);
+		let can_team = is_managerial_user() && (ctx.can_see_team !== false);
 
 		// If user is a normal employee or HR Admin, do NOT activate any restrictive filters!
 		if (!can_team) {
@@ -322,8 +314,8 @@ function setup_pms_amendment_scope_system(listview) {
 		if (scope === "my") {
 			if (ctx.employee_id) {
 				filters_to_add.push(["PMS Plan Amendment", "employee", "=", ctx.employee_id, false]);
-			} else if (frappe.session.user && frappe.session.user !== "Administrator") {
-				filters_to_add.push(["PMS Plan Amendment", "owner", "=", frappe.session.user, false]);
+			} else {
+				filters_to_add.push(["PMS Plan Amendment", "employee", "=", "__NONE__", false]);
 			}
 		} else if (scope === "team") {
 			if (ctx.employee_id) {

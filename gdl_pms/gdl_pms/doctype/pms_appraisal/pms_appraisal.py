@@ -127,11 +127,11 @@ class PMSAppraisal(Document):
         # 2. Document-level permission safety net: Supervisor 2 is strictly read-only
         user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
         roles = frappe.get_roles()
-        is_admin = any(r in roles for r in ["Administrator", "System Manager", "HR Manager", "HR Admin"])
+        is_admin = frappe.session.user == "Administrator" or "PMS HR Admin" in roles
         if not is_admin and user_emp:
             if self.supervisor_2_snapshot == user_emp and user_emp not in [self.employee, self.supervisor_snapshot, self.reviewer_snapshot]:
                 frappe.throw("Supervisor 2 has read-only access and cannot edit or modify Performance Plans or Appraisals.", frappe.PermissionError)
-            elif "Supervisor 2" in roles and user_emp not in [self.employee, self.supervisor_snapshot, self.reviewer_snapshot]:
+            elif "PMS Supervisor 2" in roles and user_emp not in [self.employee, self.supervisor_snapshot, self.reviewer_snapshot]:
                 frappe.throw("Supervisor 2 has read-only access and cannot edit or modify Performance Plans or Appraisals.", frappe.PermissionError)
 
         # 2b. Supervisor Comments & Reviewer Comments restriction:
@@ -159,7 +159,7 @@ class PMSAppraisal(Document):
 
         # 3. Prevent direct editing of targets when plan was ALREADY Approved & Monitoring in DB
         if not self.is_new() and self.db_get("plan_status") == "Approved" and self.db_get("workflow_state") == "Monitoring":
-            if not getattr(self, "_allow_target_update", False) and "System Manager" not in frappe.get_roles():
+            if not getattr(self, "_allow_target_update", False) and frappe.session.user != "Administrator" and "PMS HR Admin" not in frappe.get_roles():
                 db_targets = frappe.get_all("PMS Target", filters={"parent": self.name}, fields=["target_description", "weight", "remark"], order_by="idx asc")
                 current_targets = [{"target_description": t.target_description, "weight": flt(t.weight, 2), "remark": getattr(t, "remark", None)} for t in self.targets]
                 db_targets_formatted = [{"target_description": t.target_description, "weight": flt(t.weight, 2), "remark": getattr(t, "remark", None)} for t in db_targets]
@@ -221,7 +221,7 @@ class PMSAppraisal(Document):
         # 8. Strict Role-Based Score Validation during Appraisal Phase
         if not self.is_new() and self.appraisal_status and self.appraisal_status != "Not Activated":
             roles = frappe.get_roles()
-            is_admin = any(r in roles for r in ["Administrator", "System Manager"])
+            is_admin = frappe.session.user == "Administrator" or "PMS HR Admin" in roles
             user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
 
             if not is_admin:
@@ -342,7 +342,7 @@ def activate_appraisal_phase(docname):
     Transitions plan into the Appraisal Phase with mapped Competencies.
     """
     roles = frappe.get_roles()
-    is_hr = any(r in roles for r in ["Administrator", "System Manager", "HR Admin", "HR Manager"])
+    is_hr = frappe.session.user == "Administrator" or "PMS HR Admin" in roles
     if not is_hr:
         frappe.throw("Only HR Admin or System Manager can activate the Appraisal Phase.")
 
@@ -390,7 +390,7 @@ def submit_self_assessment(docname, employee_remarks=None, target_data=None, com
     """
     doc = frappe.get_doc("PMS Appraisal", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    is_admin = any(r in frappe.get_roles() for r in ["Administrator", "System Manager"])
+    is_admin = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
 
     if doc.employee != user_emp and not is_admin:
         frappe.throw("Only the assigned Employee can submit their Self-Assessment.")
@@ -469,7 +469,7 @@ def submit_supervisor_review(docname, supervisor_remarks=None, target_data=None,
     """
     doc = frappe.get_doc("PMS Appraisal", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    is_admin = any(r in frappe.get_roles() for r in ["Administrator", "System Manager"])
+    is_admin = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
 
     if doc.supervisor_snapshot != user_emp and not is_admin:
         frappe.throw("Only the assigned Supervisor can submit this appraisal evaluation.")
@@ -540,7 +540,7 @@ def accept_supervisor_scores(docname):
     """
     doc = frappe.get_doc("PMS Appraisal", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    is_admin = any(r in frappe.get_roles() for r in ["Administrator", "System Manager"])
+    is_admin = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
 
     if doc.employee != user_emp and not is_admin:
         frappe.throw("Only the assigned Employee can accept their appraisal.")
@@ -578,7 +578,7 @@ def raise_dispute(docname, dispute_reason):
 
     doc = frappe.get_doc("PMS Appraisal", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    is_admin = any(r in frappe.get_roles() for r in ["Administrator", "System Manager"])
+    is_admin = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
 
     if doc.employee != user_emp and not is_admin:
         frappe.throw("Only the assigned Employee can raise a dispute.")
@@ -619,7 +619,7 @@ def submit_reviewer_decision(docname, reviewer_remarks=None, target_data=None, c
     """
     doc = frappe.get_doc("PMS Appraisal", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    is_admin = any(r in frappe.get_roles() for r in ["Administrator", "System Manager"])
+    is_admin = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
 
     if doc.reviewer_snapshot != user_emp and not is_admin:
         frappe.throw("Only the assigned Reviewer can resolve this dispute.")
@@ -672,7 +672,7 @@ def accept_reviewer_decision(docname):
     """
     doc = frappe.get_doc("PMS Appraisal", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    is_admin = any(r in frappe.get_roles() for r in ["Administrator", "System Manager"])
+    is_admin = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
 
     if doc.employee != user_emp and not is_admin:
         frappe.throw("Only the assigned Employee can accept the reviewer decision.")
@@ -698,7 +698,7 @@ def request_perc_review(docname, justification):
 
     doc = frappe.get_doc("PMS Appraisal", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    is_admin = any(r in frappe.get_roles() for r in ["Administrator", "System Manager"])
+    is_admin = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
 
     if doc.employee != user_emp and not is_admin:
         frappe.throw("Only the assigned Employee can request a PERC review.")
@@ -747,7 +747,7 @@ def lock_appraisal(docname, final_score=None):
     Stage 6: HR Admin reviews appraisal (post-acceptance or post-PERC), updates final score if needed, and locks it permanently.
     """
     roles = frappe.get_roles()
-    is_hr = any(r in roles for r in ["Administrator", "System Manager", "HR Admin", "HR Manager"])
+    is_hr = frappe.session.user == "Administrator" or "PMS HR Admin" in roles
     if not is_hr:
         frappe.throw("Only HR Admin or System Manager can lock appraisals.")
 
@@ -918,7 +918,7 @@ def sync_appraisal_to_employee_master(docname):
 @frappe.whitelist()
 def open_amendment_window(docname):
     roles = frappe.get_roles()
-    is_hr = any(r in roles for r in ["Administrator", "System Manager", "HR Admin", "HR Manager"])
+    is_hr = frappe.session.user == "Administrator" or "PMS HR Admin" in roles
     if not is_hr:
         frappe.throw("Only HR Admin or System Manager can open the Amendment Window.")
 
@@ -961,7 +961,7 @@ def open_amendment_window(docname):
 @frappe.whitelist()
 def close_amendment_window(docname):
     roles = frappe.get_roles()
-    is_hr = any(r in roles for r in ["Administrator", "System Manager", "HR Admin", "HR Manager"])
+    is_hr = frappe.session.user == "Administrator" or "PMS HR Admin" in roles
     if not is_hr:
         frappe.throw("Only HR Admin or System Manager can close the Amendment Window.")
 
@@ -979,7 +979,7 @@ def request_amendment(docname):
     if doc.plan_status != "Approved" or doc.workflow_state != "Monitoring":
         frappe.throw("Amendments can only be requested for Approved plans in Monitoring stage.")
 
-    is_hr = any(r in frappe.get_roles() for r in ["Administrator", "System Manager", "HR Admin"])
+    is_hr = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
     if not doc.amendment_window_open and not is_hr:
         frappe.throw("The Amendment Window for this Performance Plan is currently closed by HR Admin.")
 
@@ -1100,7 +1100,7 @@ def get_current_employee():
 def is_authorized_to_approve(docname):
     doc = frappe.get_doc("PMS Appraisal", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    is_sys_mgr = "System Manager" in frappe.get_roles()
+    is_sys_mgr = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
     
     if doc.plan_status == "Pending Supervisor Approval":
         return bool(doc.supervisor_snapshot == user_emp or is_sys_mgr)
@@ -1125,7 +1125,7 @@ def send_for_approval(docname):
 
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
     roles = frappe.get_roles()
-    is_admin = any(r in roles for r in ["Administrator", "System Manager", "HR Admin", "HR Manager"])
+    is_admin = frappe.session.user == "Administrator" or "PMS HR Admin" in roles
     is_supervisor = bool(user_emp and doc.supervisor_snapshot and user_emp == doc.supervisor_snapshot)
     if doc.employee != user_emp and not is_supervisor and not is_admin:
         frappe.throw("Not authorized.")
@@ -1204,7 +1204,7 @@ def return_to_employee_with_edits(docname, remark=None, targets=None):
 def approve_plan(docname, comment=None, targets=None):
     doc = frappe.get_doc("PMS Appraisal", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    is_sys_mgr = "System Manager" in frappe.get_roles()
+    is_sys_mgr = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
 
     approver_name = frappe.db.get_value("Employee", user_emp, "employee_name") if user_emp else frappe.session.user
     comment_suffix = f': "{comment}"' if comment else ""
@@ -1293,7 +1293,7 @@ def confirm_plan_agreement(docname):
     """Allows an employee (or HR Admin) to confirm agreement declaration on an approved plan."""
     doc = frappe.get_doc("PMS Appraisal", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-    is_admin = frappe.session.user == "Administrator" or any(r in frappe.get_roles() for r in ["HR Admin", "HR Manager", "System Manager"])
+    is_admin = frappe.session.user == "Administrator" or "PMS HR Admin" in frappe.get_roles()
 
     if doc.employee != user_emp and not is_admin:
         frappe.throw("Only the employee can confirm agreement to their Performance Plan.")
@@ -1365,7 +1365,7 @@ def return_plan(docname, remark, targets=None):
     doc = frappe.get_doc("PMS Appraisal", docname)
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
     roles = frappe.get_roles()
-    is_sys_mgr = any(r in roles for r in ["Administrator", "System Manager", "HR Manager", "HR Admin"])
+    is_sys_mgr = frappe.session.user == "Administrator" or "PMS HR Admin" in roles
 
     if doc.plan_status == "Pending Supervisor Approval":
         if doc.supervisor_snapshot != user_emp and not is_sys_mgr:
@@ -1484,7 +1484,7 @@ def bulk_approve_plan(docnames):
 
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
     roles = frappe.get_roles()
-    is_sys_mgr = any(r in roles for r in ["Administrator", "System Manager", "HR Manager", "HR Admin"])
+    is_sys_mgr = frappe.session.user == "Administrator" or "PMS HR Admin" in roles
 
     approved_count = 0
     errors = []
@@ -1547,7 +1547,7 @@ def bulk_reject_plan(docnames, remark):
 
     user_emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
     roles = frappe.get_roles()
-    is_sys_mgr = any(r in roles for r in ["Administrator", "System Manager", "HR Manager", "HR Admin"])
+    is_sys_mgr = frappe.session.user == "Administrator" or "PMS HR Admin" in roles
 
     rejected_count = 0
     errors = []
@@ -1606,7 +1606,7 @@ def get_permission_query_conditions(user):
     if not user:
         user = frappe.session.user
 
-    if user == "Administrator" or "System Manager" in frappe.get_roles(user) or "HR Manager" in frappe.get_roles(user) or "HR Admin" in frappe.get_roles(user):
+    if user == "Administrator" or "PMS HR Admin" in frappe.get_roles(user):
         return ""
 
     employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
@@ -1621,7 +1621,7 @@ def has_permission(doc, ptype="read", user=None):
         user = frappe.session.user
 
     roles = frappe.get_roles(user)
-    if user == "Administrator" or "System Manager" in roles or "HR Manager" in roles or "HR Admin" in roles:
+    if user == "Administrator" or "PMS HR Admin" in roles:
         return True
 
     employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
@@ -2009,10 +2009,10 @@ def get_user_performance_context():
     emp_id = emp.name if emp else None
     emp_name = emp.employee_name if emp else None
 
-    is_supervisor = "Supervisor" in roles
-    is_supervisor_2 = "Supervisor 2" in roles
-    is_reviewer = "Reviewer" in roles
-    is_admin = any(r in roles for r in ["System Manager", "HR Admin", "HR Manager", "Administrator"])
+    is_supervisor = "PMS Supervisor" in roles
+    is_supervisor_2 = "PMS Supervisor 2" in roles
+    is_reviewer = "PMS Reviewer" in roles
+    is_admin = user == "Administrator" or "PMS HR Admin" in roles
 
     has_subordinates = False
     if emp_id:
@@ -2021,7 +2021,7 @@ def get_user_performance_context():
             where status = 'Active' and (reports_to = %(emp)s or reviewer = %(emp)s or supervisor_2 = %(emp)s)
         """, {"emp": emp_id})[0][0] > 0
 
-    can_see_team = (has_subordinates or is_supervisor or is_supervisor_2 or is_reviewer) and not any(r in roles for r in ["HR Admin", "HR Manager"])
+    can_see_team = has_subordinates or is_supervisor or is_supervisor_2 or is_reviewer or is_admin
 
     pending_plan_count = 0
     pending_appraisal_count = 0

@@ -58,18 +58,8 @@ frappe.ui.form.on("PMS Appraisal Cycle", {
 			hide_employee_hierarchy_section(frm);
 			return;
 		}
-		show_employee_hierarchy_section(frm);
-		setup_cycle_grid_formatters(frm);
-		toggle_plan_and_status_columns(frm);
 
-		// Render employees and summary on refresh
-		if (frm.is_new() || (!frm.doc.applicable_employees || !frm.doc.applicable_employees.length)) {
-			fetch_and_render_employees(frm, true);
-		} else {
-			render_existing_summary(frm);
-			toggle_plan_and_status_columns(frm);
-		}
-
+		// Register HR Actions reliably before grid/summary rendering
 		frm.page.add_inner_button(__("Sync Employees List"), function() {
 			frappe.confirm(__("This will refresh the applicable employees list with their current supervisor and reviewer details from Employee masters. Continue?"), function() {
 				frappe.call({
@@ -117,7 +107,7 @@ frappe.ui.form.on("PMS Appraisal Cycle", {
 		if (!frm.is_new() && frm.doc.status !== "Draft" && frm.doc.status !== "Closed") {
 			frm.page.add_inner_button(__("Activate Appraisal Phase"), function() {
 				open_activate_appraisal_dialog(frm);
-			}, __("Actions")).addClass("btn-primary text-white").css("background-color", "#1d4ed8");
+			}, __("Actions")).addClass("text-primary font-weight-bold");
 		}
 
 		if (!frm.is_new()) {
@@ -145,7 +135,6 @@ frappe.ui.form.on("PMS Appraisal Cycle", {
 			}, __("Actions"));
 		}
 
-
 		// HR Quick Action Buttons to Open/Close Amendment Window
 		if (!frm.doc.amendment_window_open) {
 			frm.page.add_inner_button(__("Open Amendment Window"), function() {
@@ -154,7 +143,7 @@ frappe.ui.form.on("PMS Appraisal Cycle", {
 						frappe.show_alert({message: __("Amendment Window Opened for Employees."), indicator: "green"});
 					});
 				});
-			}, __("Actions")).addClass("btn-primary text-white").css("background-color", "#15803d");
+			}, __("Actions")).addClass("text-success font-weight-bold");
 		} else {
 			frm.page.add_inner_button(__("Close Amendment Window"), function() {
 				frm.set_value("amendment_window_open", 0).then(() => {
@@ -162,7 +151,23 @@ frappe.ui.form.on("PMS Appraisal Cycle", {
 						frappe.show_alert({message: __("Amendment Window Closed."), indicator: "red"});
 					});
 				});
-			}, __("Actions")).addClass("btn-danger text-white");
+			}, __("Actions")).addClass("text-danger font-weight-bold");
+		}
+
+		try {
+			show_employee_hierarchy_section(frm);
+			setup_cycle_grid_formatters(frm);
+			toggle_plan_and_status_columns(frm);
+
+			// Render employees and summary on refresh
+			if (frm.is_new() || (!frm.doc.applicable_employees || !frm.doc.applicable_employees.length)) {
+				fetch_and_render_employees(frm, true);
+			} else {
+				render_existing_summary(frm);
+				toggle_plan_and_status_columns(frm);
+			}
+		} catch (e) {
+			console.error("[GDL PMS] Cycle UI render error:", e);
 		}
 	},
 
@@ -1029,7 +1034,7 @@ function open_activate_appraisal_dialog(frm) {
 
 function is_hr_admin_user() {
 	if (frappe.session && (frappe.session.user === "Administrator" || frappe.session.user === "hr.admin@gdl.bt")) return true;
-	var allowed_roles = ["HR Admin", "HR Manager", "System Manager", "Administrator"];
+	var allowed_roles = ["PMS HR Admin", "Administrator"];
 	return allowed_roles.some(function(r) {
 		return (frappe.user && typeof frappe.user.has_role === "function" && frappe.user.has_role(r))
 			|| (frappe.boot && frappe.boot.user && frappe.boot.user.roles && frappe.boot.user.roles.includes(r))
@@ -1134,7 +1139,7 @@ function setup_cycle_action_buttons(frm) {
 					});
 				}
 			);
-		}, __("Actions")).addClass("btn-danger text-white");
+		}, __("Actions")).addClass("text-danger font-weight-bold");
 	}
 }
 

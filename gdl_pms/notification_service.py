@@ -329,7 +329,7 @@ def get_hr_users():
 	"""Helper to get all active HR Admin and HR Manager users."""
 	users = frappe.get_all(
 		"Has Role",
-		filters={"role": ["in", ["HR Admin", "HR Manager"]], "parenttype": "User"},
+		filters={"role": ["in", ["PMS HR Admin"]], "parenttype": "User"},
 		pluck="parent"
 	)
 	active_users = []
@@ -403,4 +403,44 @@ def notify_in_app_perc_requested(appraisal_doc, perc_case_name, justification):
 		)
 		notified += 1
 	return notified
+
+
+PMS_NOTIFICATION_DOCTYPES = {
+	"PMS Appraisal",
+	"PMS Appraisal Cycle",
+	"PMS Plan Amendment",
+	"PMS Calendar",
+	"PERC Case",
+	"PMS Grade Group",
+	"PMS Manage Competencies",
+}
+
+
+@frappe.whitelist()
+def get_scoped_notification_logs(limit=20, pms_only=0):
+	"""Return Notification Logs scoped to PMS DocTypes when inside GDL PMS, or non-PMS outside."""
+	limit_int = max(1, min(int(limit or 20), 100))
+	want_pms = bool(int(pms_only or 0))
+
+	# Fetch a wider batch so filtering still yields up to `limit_int` items without touching Frappe core
+	logs = frappe.db.get_list(
+		"Notification Log",
+		fields=["*"],
+		limit=limit_int * 4,
+		order_by="creation desc",
+	)
+
+	filtered = []
+	for log in logs:
+		is_pms = log.get("document_type") in PMS_NOTIFICATION_DOCTYPES
+		if (want_pms and is_pms) or (not want_pms and not is_pms):
+			filtered.append(log)
+			if len(filtered) >= limit_int:
+				break
+
+	user_info = frappe._dict()
+	for user in {log.get("from_user") for log in filtered if log.get("from_user")}:
+		frappe.utils.add_user_info(user, user_info)
+
+	return {"notification_logs": filtered, "user_info": user_info}
 

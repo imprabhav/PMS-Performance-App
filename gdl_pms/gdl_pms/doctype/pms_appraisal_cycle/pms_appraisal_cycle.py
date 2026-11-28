@@ -11,7 +11,7 @@ class PMSAppraisalCycle(Document):
 		user = frappe.session.user
 		if user != "Administrator":
 			roles = frappe.get_roles(user)
-			if not any(r in roles for r in ["HR Admin", "System Manager", "HR Manager"]):
+			if "PMS HR Admin" not in roles:
 				self.set("applicable_employees", [])
 				return
 
@@ -280,9 +280,9 @@ def check_hr_admin_permission():
 	if user == "Administrator":
 		return
 	roles = frappe.get_roles(user)
-	if not any(r in roles for r in ["HR Admin", "System Manager", "HR Manager"]):
+	if "PMS HR Admin" not in roles:
 		frappe.throw(
-			_("Only HR Admin is permitted to access cycle employee reporting hierarchy."),
+			_("Only PMS HR Admin is permitted to access cycle employee reporting hierarchy."),
 			frappe.PermissionError
 		)
 
@@ -641,11 +641,11 @@ def get_permission_query_conditions(user):
 	if user == "Administrator": return ""
 	
 	roles = frappe.get_roles(user)
-	if "HR Admin" in roles or "System Manager" in roles:
+	if "PMS HR Admin" in roles:
 		return ""
 	
-	# Allow all authenticated employees, supervisors, reviewers, and supervisor 2 to view draft and active/published cycles
-	allowed_roles = {"Employee", "Supervisor", "Reviewer", "Supervisor 2"}
+	# Allow all authenticated PMS participants to view draft and active/published cycles
+	allowed_roles = {"PMS Employee", "PMS Supervisor", "PMS Reviewer", "PMS Supervisor 2", "PMS PERC"}
 	if any(r in allowed_roles for r in roles):
 		return "`tabPMS Appraisal Cycle`.status IN ('Draft', 'Active', 'Planning Open', 'Monitoring', 'Self-Rating Open', 'Closed')"
 		
@@ -657,11 +657,11 @@ def has_permission(doc, ptype="read", user=None):
 	if user == "Administrator": return True
 	
 	roles = frappe.get_roles(user)
-	if "HR Admin" in roles:
+	if "PMS HR Admin" in roles:
 		return True
 		
 	if ptype == "read":
-		allowed_roles = {"System Manager", "Employee", "Supervisor", "Reviewer", "Supervisor 2"}
+		allowed_roles = {"PMS Employee", "PMS Supervisor", "PMS Reviewer", "PMS Supervisor 2", "PMS PERC"}
 		if any(r in allowed_roles for r in roles):
 			return True
 	

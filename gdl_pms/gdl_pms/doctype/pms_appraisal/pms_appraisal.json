@@ -351,7 +351,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "PMS Employee",
    "share": 1,
    "write": 1
   },
@@ -363,7 +363,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Employee",
+   "role": "PMS Supervisor",
    "share": 1,
    "write": 1
   },
@@ -375,19 +375,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Supervisor",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Reviewer",
+   "role": "PMS Reviewer",
    "share": 1,
    "write": 1
   },
@@ -399,7 +387,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Supervisor 2",
+   "role": "PMS Supervisor 2",
    "share": 0,
    "write": 0
   },
@@ -411,19 +399,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "HR Admin",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "HR Manager",
+   "role": "PMS HR Admin",
    "share": 1,
    "write": 1
   }
@@ -434,7 +410,7 @@
  "sort_field": "creation",
  "sort_order": "DESC",
  "track_changes": 1,
- "track_views": 1,
+ "track_views": 0,
  "states": [],
  "editable_grid": 0
 }

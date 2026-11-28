@@ -23,10 +23,7 @@
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "HR Admin"
-  },
-  {
-   "role": "System Manager"
+   "role": "PMS HR Admin"
   }
  ],
  "snapshot_report": 0,

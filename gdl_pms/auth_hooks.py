@@ -1,20 +1,24 @@
 import frappe
 
 PMS_ROLE_ROUTES = [
-    ("HR Admin", "desk/pms-hr", "PMS HR"),
-    ("Reviewer", "desk/pms-reviewer", "PMS Reviewer"),
-    ("Supervisor 2", "desk/pms-supervisor-2", "PMS Supervisor 2"),
-    ("Supervisor", "desk/pms-supervisor", "PMS Supervisor"),
-    ("Employee", "desk/pms-employee", "PMS Employee"),
+    ("PMS HR Admin", "desk/pms-hr", "PMS HR"),
+    ("PMS Reviewer", "desk/pms-reviewer", "PMS Reviewer"),
+    ("PMS Supervisor 2", "desk/pms-supervisor-2", "PMS Supervisor 2"),
+    ("PMS Supervisor", "desk/pms-supervisor", "PMS Supervisor"),
+    ("PMS PERC", "desk/pms-perc", "PMS PERC"),
+    ("PMS Employee", "desk/pms-employee", "PMS Employee"),
 ]
 
 PMS_ALLOWED_WORKSPACES = {
-    "HR Admin": ["PMS HR"],
-    "Reviewer": ["PMS Reviewer", "PMS Employee"],
-    "Supervisor 2": ["PMS Supervisor 2", "PMS Employee"],
-    "Supervisor": ["PMS Supervisor", "PMS Employee"],
-    "Employee": ["PMS Employee"],
+    "PMS HR Admin": ["PMS HR", "PMS Employee", "PMS Supervisor", "PMS Supervisor 2", "PMS Reviewer"],
+    "PMS Reviewer": ["PMS Reviewer", "PMS Employee"],
+    "PMS Supervisor 2": ["PMS Supervisor 2", "PMS Employee"],
+    "PMS Supervisor": ["PMS Supervisor", "PMS Employee"],
+    "PMS PERC": ["PMS PERC"],
+    "PMS Employee": ["PMS Employee"],
 }
+
+PMS_ROLES_SET = {"PMS HR Admin", "PMS Employee", "PMS Supervisor", "PMS Supervisor 2", "PMS Reviewer", "PMS PERC"}
 
 def get_user_pms_info(user=None):
     if not user:
@@ -24,8 +28,8 @@ def get_user_pms_info(user=None):
 
     roles = set(frappe.get_roles(user))
     
-    # Do not restrict System Managers or Administrators
-    if "System Manager" in roles or "Administrator" in roles:
+    # Do not restrict Administrator
+    if "Administrator" in roles:
         return None
 
     for role, route, ws_name in PMS_ROLE_ROUTES:
@@ -50,8 +54,38 @@ def boot_session(bootinfo):
     Enriches bootinfo with PMS competencies data.
     Ensures PMS workspaces use the dedicated GDL PMS sidebar while
     preserving all standard ERPNext, HRMS, and custom app desktop icons and workspaces.
+    Hides GDL PMS from Desk completely for users without any dedicated PMS role.
     """
     try:
+        user = frappe.session.user
+        roles = set(frappe.get_roles(user)) if user and user != "Guest" else set()
+        has_pms_access = (user == "Administrator") or bool(roles & PMS_ROLES_SET)
+
+        if not has_pms_access:
+            if "app_data" in bootinfo and isinstance(bootinfo["app_data"], list):
+                bootinfo["app_data"] = [
+                    a for a in bootinfo["app_data"]
+                    if not (isinstance(a, dict) and a.get("app_name") == "gdl_pms")
+                ]
+            if "desktop_icons" in bootinfo and isinstance(bootinfo["desktop_icons"], list):
+                pms_icon_names = {
+                    "GDL PMS", "PMS HR Dashboard", "PMS Employee Dashboard",
+                    "PMS Supervisor Dashboard", "PMS Supervisor 2 Dashboard",
+                    "PMS Reviewer Dashboard", "PMS HR", "PMS Employee",
+                    "PMS Supervisor", "PMS Supervisor 2", "PMS Reviewer", "PMS PERC",
+                }
+                bootinfo["desktop_icons"] = [
+                    d for d in bootinfo["desktop_icons"]
+                    if not (isinstance(d, dict) and (
+                        d.get("app") == "gdl_pms"
+                        or d.get("name") in pms_icon_names
+                        or d.get("label") in pms_icon_names
+                    ))
+                ]
+            if "module_sidebars" in bootinfo and isinstance(bootinfo["module_sidebars"], dict):
+                bootinfo["module_sidebars"].pop("GDL PMS", None)
+            return
+
         from gdl_pms.competencies import get_all_competencies_and_weights
         bootinfo["pms_competencies_data"] = get_all_competencies_and_weights()
     except Exception:
@@ -81,8 +115,6 @@ def boot_session(bootinfo):
         # and point GDL PMS Desktop Icon / app_data directly to the user's role dashboard
         user_pms = get_user_pms_info()
         user_pms_route = "/" + user_pms["route"] if user_pms else "/desk/pms-hr"
-        if "HR Manager" in set(frappe.get_roles(frappe.session.user)):
-            user_pms_route = "/desk/pms-hr"
 
         if "app_data" in bootinfo and isinstance(bootinfo["app_data"], list):
             for app_entry in bootinfo["app_data"]:

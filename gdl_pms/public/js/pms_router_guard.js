@@ -10,33 +10,33 @@
 
         var roles = frappe.user_roles || (frappe.boot && frappe.boot.user && frappe.boot.user.roles) || [];
 
-        // 1. HR Admin / HR Manager -> HR Dashboard
-        if (roles.indexOf('HR Admin') !== -1 || roles.indexOf('HR Manager') !== -1 || roles.indexOf('PMS HR') !== -1) {
+        // 1. PMS HR Admin -> HR Dashboard
+        if (roles.indexOf('PMS HR Admin') !== -1) {
             return 'pms-hr';
         }
 
-        // 2. Reviewer -> Reviewer Dashboard
-        if (roles.indexOf('Reviewer') !== -1 || roles.indexOf('PMS Reviewer') !== -1) {
+        // 2. PMS Reviewer -> Reviewer Dashboard
+        if (roles.indexOf('PMS Reviewer') !== -1) {
             return 'pms-reviewer';
         }
 
-        // 3. Supervisor 2 -> Supervisor 2 Dashboard
-        if (roles.indexOf('Supervisor 2') !== -1) {
+        // 3. PMS Supervisor 2 -> Supervisor 2 Dashboard
+        if (roles.indexOf('PMS Supervisor 2') !== -1) {
             return 'pms-supervisor-2';
         }
 
-        // 4. Supervisor -> Supervisor Dashboard
-        if (roles.indexOf('Supervisor') !== -1) {
+        // 4. PMS Supervisor -> Supervisor Dashboard
+        if (roles.indexOf('PMS Supervisor') !== -1) {
             return 'pms-supervisor';
         }
 
-        // 5. Employee -> Employee Dashboard
-        if (roles.indexOf('Employee') !== -1 || roles.indexOf('PMS Employee') !== -1) {
+        // 5. PMS Employee -> Employee Dashboard
+        if (roles.indexOf('PMS Employee') !== -1) {
             return 'pms-employee';
         }
 
-        // 6. Admin / System Manager: do NOT force a redirect away from Desktop view / App Grid or admin views
-        if (roles.indexOf('Administrator') !== -1 || roles.indexOf('System Manager') !== -1) {
+        // 6. Administrator: do NOT force a redirect away from Desktop view / App Grid or admin views
+        if (frappe.session.user === 'Administrator' || roles.indexOf('Administrator') !== -1) {
             return null;
         }
 
@@ -50,37 +50,26 @@
 
         var roles = frappe.user_roles || (frappe.boot && frappe.boot.user && frappe.boot.user.roles) || [];
 
-        // Administrator and System Manager have access to all dashboards
-        if (roles.indexOf('Administrator') !== -1 || roles.indexOf('System Manager') !== -1) {
+        // Root Administrator has access to all dashboards
+        if (frappe.session.user === 'Administrator' || roles.indexOf('Administrator') !== -1) {
             return PMS_DASHBOARD_ROUTES.slice();
         }
 
-        var is_hr = (roles.indexOf('HR Admin') !== -1 || roles.indexOf('HR Manager') !== -1 || roles.indexOf('PMS HR') !== -1);
-
         var allowed = [];
-        if (is_hr) {
+        if (roles.indexOf('PMS HR Admin') !== -1) {
             allowed.push('pms-hr');
         }
-        if (roles.indexOf('Reviewer') !== -1 || roles.indexOf('PMS Reviewer') !== -1) {
+        if (roles.indexOf('PMS Reviewer') !== -1) {
             allowed.push('pms-reviewer');
         }
-        if (roles.indexOf('Supervisor 2') !== -1) {
+        if (roles.indexOf('PMS Supervisor 2') !== -1) {
             allowed.push('pms-supervisor-2');
         }
-        if (roles.indexOf('Supervisor') !== -1) {
+        if (roles.indexOf('PMS Supervisor') !== -1) {
             allowed.push('pms-supervisor');
         }
-        // Supervisors, Reviewers, and Monitoring Supervisors (Supervisor 2) are also Employees in PMS,
-        // so PMS Employee page is always accessible for them in addition to their supervisory dashboards.
-        // HR Admin specifically does not see or access PMS Employee.
-        if (!is_hr) {
-            if (roles.indexOf('Employee') !== -1 || roles.indexOf('PMS Employee') !== -1 ||
-                roles.indexOf('Supervisor') !== -1 || roles.indexOf('Supervisor 2') !== -1 ||
-                roles.indexOf('Reviewer') !== -1 || roles.indexOf('PMS Reviewer') !== -1) {
-                if (allowed.indexOf('pms-employee') === -1) {
-                    allowed.push('pms-employee');
-                }
-            }
+        if (roles.indexOf('PMS Employee') !== -1) {
+            allowed.push('pms-employee');
         }
         return allowed;
     }
@@ -95,33 +84,36 @@
             selectors.push('.sidebar-item-container[data-link-to="' + link_to + '"]');
         }
         $(selectors.join(', ')).remove();
+        $('.sidebar-item-container').filter(function () {
+            return $(this).find('.sidebar-item-label').text().trim() === name;
+        }).remove();
     }
 
     function hide_pms_employee_for_hr() {
         var roles = frappe.user_roles || (frappe.boot && frappe.boot.user && frappe.boot.user.roles) || [];
         var is_administrator = (frappe.session && frappe.session.user === 'Administrator') || roles.indexOf('Administrator') !== -1;
-        var is_admin = is_administrator || roles.indexOf('System Manager') !== -1;
-        var is_hr = (roles.indexOf('HR Admin') !== -1 || roles.indexOf('HR Manager') !== -1 || roles.indexOf('PMS HR') !== -1);
-        if ((is_hr || is_admin) && !is_administrator) {
-            remove_sidebar_item('PMS Employee', 'PMS Employee');
-        }
-        if (is_admin && !is_administrator) {
-            if (roles.indexOf('Supervisor') === -1 && roles.indexOf('PMS Supervisor') === -1) {
-                remove_sidebar_item('PMS Supervisor', 'PMS Supervisor');
-            }
-            if (roles.indexOf('Reviewer') === -1 && roles.indexOf('PMS Reviewer') === -1) {
-                remove_sidebar_item('PMS Reviewer', 'PMS Reviewer');
-            }
-            if (roles.indexOf('Supervisor 2') === -1 && roles.indexOf('PMS Supervisor 2') === -1) {
-                remove_sidebar_item('PMS Supervisor 2', 'PMS Supervisor 2');
-            }
-            if (roles.indexOf('PMS PERC') === -1) {
-                remove_sidebar_item('PMS PERC', 'PMS PERC');
-            }
-        }
-        if (!is_hr && !is_admin) {
+        if (is_administrator) return;
+
+        var is_hr = roles.indexOf('PMS HR Admin') !== -1;
+        if (!is_hr) {
+            remove_sidebar_item('PMS HR', 'PMS HR');
             remove_sidebar_item('Grade Groups', 'PMS Grade Group');
             remove_sidebar_item('Manage Competencies', 'PMS Manage Competencies');
+        }
+        if (roles.indexOf('PMS Employee') === -1) {
+            remove_sidebar_item('PMS Employee', 'PMS Employee');
+        }
+        if (roles.indexOf('PMS Supervisor') === -1) {
+            remove_sidebar_item('PMS Supervisor', 'PMS Supervisor');
+        }
+        if (roles.indexOf('PMS Reviewer') === -1) {
+            remove_sidebar_item('PMS Reviewer', 'PMS Reviewer');
+        }
+        if (roles.indexOf('PMS Supervisor 2') === -1) {
+            remove_sidebar_item('PMS Supervisor 2', 'PMS Supervisor 2');
+        }
+        if (roles.indexOf('PMS PERC') === -1) {
+            remove_sidebar_item('PMS PERC', 'PMS PERC');
         }
     }
 
@@ -577,10 +569,52 @@
         }
     }
 
+    // Scope Desk Notification Bell to PMS-only inside GDL PMS, and hide PMS notifications outside GDL PMS
+    function is_pms_notification_context() {
+        if (document.body && document.body.classList && document.body.classList.contains('gdl-pms-active')) {
+            return true;
+        }
+        var route = (frappe.get_route && frappe.get_route()) || [];
+        var joined = route.join('/').toLowerCase();
+        var pathname = (window.location.pathname || '').toLowerCase();
+        return joined.indexOf('pms') !== -1 || joined.indexOf('perc') !== -1 ||
+            pathname.indexOf('/gdl-pms') !== -1 || pathname.indexOf('/pms-') !== -1 || pathname.indexOf('/perc') !== -1;
+    }
+
+    function patch_pms_notifications() {
+        if (!window.frappe || typeof frappe.call !== 'function' || frappe.call._pms_notif_patched) return;
+        var orig_call = frappe.call;
+        frappe.call = function (opts) {
+            if (opts && typeof opts === 'object' && opts.method === 'frappe.desk.doctype.notification_log.notification_log.get_notification_logs') {
+                var new_opts = Object.assign({}, opts, {
+                    method: 'gdl_pms.notification_service.get_scoped_notification_logs',
+                    args: Object.assign({}, opts.args || {}, {
+                        pms_only: is_pms_notification_context() ? 1 : 0
+                    })
+                });
+                return orig_call.call(this, new_opts);
+            }
+            return orig_call.apply(this, arguments);
+        };
+        frappe.call._pms_notif_patched = true;
+    }
+
+    var _last_pms_notif_ctx = null;
+    function refresh_notifications_if_context_changed() {
+        var cur_ctx = is_pms_notification_context();
+        if (_last_pms_notif_ctx === cur_ctx) return;
+        _last_pms_notif_ctx = cur_ctx;
+        if (frappe.ui && frappe.ui.notifications && typeof frappe.ui.notifications.get_notifications_list === 'function') {
+            frappe.ui.notifications.get_notifications_list();
+        }
+    }
+
     // Check on route changes & app initialization
     $(document).on('app_ready page-change workspace_rendered form-refresh', function () {
+        patch_pms_notifications();
         hide_pms_employee_for_hr();
         cleanup_pms_page_modes();
+        refresh_notifications_if_context_changed();
         check_and_redirect_to_dashboard();
         patch_sidebar_active();
         sync_pms_sidebar_active_item();
@@ -589,8 +623,10 @@
 
     if (window.frappe && frappe.router) {
         frappe.router.on('change', function () {
+            patch_pms_notifications();
             hide_pms_employee_for_hr();
             cleanup_pms_page_modes();
+            refresh_notifications_if_context_changed();
             check_and_redirect_to_dashboard();
             patch_sidebar_active();
             sync_pms_sidebar_active_item();
@@ -599,6 +635,7 @@
     }
 
     // Immediate and staggered initialization checks
+    patch_pms_notifications();
     patch_breadcrumbs();
     patch_router();
     patch_not_found();
@@ -611,4 +648,23 @@
     setTimeout(function () { hide_pms_employee_for_hr(); cleanup_pms_page_modes(); check_and_redirect_to_dashboard(); patch_sidebar_active(); sync_pms_sidebar_active_item(); render_app_grid_button(); }, 100);
     setTimeout(function () { hide_pms_employee_for_hr(); cleanup_pms_page_modes(); check_and_redirect_to_dashboard(); patch_sidebar_active(); sync_pms_sidebar_active_item(); render_app_grid_button(); }, 300);
     setTimeout(function () { hide_pms_employee_for_hr(); cleanup_pms_page_modes(); check_and_redirect_to_dashboard(); patch_sidebar_active(); sync_pms_sidebar_active_item(); render_app_grid_button(); }, 800);
+
+    // Keep sidebar role filtering in sync whenever Frappe re-renders the sidebar
+    if (typeof MutationObserver !== 'undefined') {
+        var _pms_sidebar_timer = null;
+        var _pms_sidebar_observer = new MutationObserver(function () {
+            if (_pms_sidebar_timer) clearTimeout(_pms_sidebar_timer);
+            _pms_sidebar_timer = setTimeout(function () {
+                hide_pms_employee_for_hr();
+            }, 30);
+        });
+        var attachSidebarObserver = function () {
+            var target = document.querySelector('.body-sidebar, .desk-sidebar') || document.body;
+            if (target) {
+                _pms_sidebar_observer.observe(target, { childList: true, subtree: true });
+            }
+        };
+        $(document).on('app_ready', attachSidebarObserver);
+        attachSidebarObserver();
+    }
 })();
