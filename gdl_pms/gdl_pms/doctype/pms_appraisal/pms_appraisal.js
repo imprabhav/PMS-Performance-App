@@ -2994,6 +2994,19 @@ frappe.ui.form.on("PMS Appraisal", {
 		});
 	},
 
+	after_save: function(frm) {
+		setTimeout(function() {
+			if (!frm || !frm.doc || frm.is_dirty()) return;
+			if (frm.page && frm.page.inner_toolbar &&
+				frm.page.inner_toolbar.find('.btn').filter(function() {
+					let t = $(this).text().trim();
+					return t === __("Send for Approval") || t === __("Resubmit for Approval");
+				}).length === 0) {
+				frm.refresh();
+			}
+		}, 120);
+	},
+
 	targets_add: function(frm) {
 		if (frm._is_appraisal_mode) {
 			update_live_appraisal_scores(frm);
@@ -3033,7 +3046,15 @@ frappe.ui.form.on("PMS Target", {
 		let row = locals[cdt][cdn];
 		if (row && row.weight != null) {
 			row.weight = flt(row.weight, 2);
-			frm.refresh_field("targets");
+			setTimeout(function() {
+				let tg = frm.fields_dict["targets"] && frm.fields_dict["targets"].grid;
+				if (!tg) return;
+				tg.prevent_build = false;
+				frm.refresh_field("targets");
+				if (tg.parent && $(tg.parent).find(".grid-heading-row .grid-row").length === 0 && tg.make_head) {
+					tg.make_head();
+				}
+			}, 50);
 		}
 	},
 
